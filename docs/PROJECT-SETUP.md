@@ -14,9 +14,10 @@ specification.
 
 | Location | Owner and purpose |
 | --- | --- |
-| `west.yml` | Sole source for exact upstream repository revisions and checkout paths |
+| `.gitmodules` | Public fork URLs and `development` update branches for the Zephyr and CANnectivity submodules |
+| `west.yml` | Exact tested revisions and checkout paths for all seven dependencies |
 | `.west/` | Ignored local West workspace configuration |
-| `.deps/` | Ignored upstream checkouts, optional local toolchain and lab signing key |
+| `.deps/` | Two tracked submodule links, five ignored West checkouts, optional local toolchain and lab signing key |
 | `platform/mcxn236_control/` | Local EP0 entry command, MCUboot mailbox, WinUSB binding and slot-1 writer selection |
 | `board/` | FRDM-MCXN236 pins, channels, partitions and Kconfig overlays |
 | `scripts/fw.py` | Portable clean-revision verification and app/bootloader build; never fetches repositories |
@@ -24,15 +25,19 @@ specification.
 | `verification/` | Committed outcomes, including failed checks and hardware limits |
 | `build/`, `evidence/` | Ignored generated artifacts and full run logs |
 
-The application builds upstream `cannectivity/app` directly. Its build manifest
-fetches upstream Zephyr, CANnectivity and NXP HAL, not the GitHub forks. West
-fetches the seven pinned repositories. `scripts/fw.py prepare` verifies every
-revision and requires a clean checkout; `check`, `app` and `bootloader` never
-fetch repositories. The bootloader and application share one partition
+The application builds the clean pinned `cannectivity/app` directly. Zephyr and
+CANnectivity come from public `Swamy-BV` fork submodules; their `development`
+branches point to the tested commits. Normal submodule initialization uses the
+parent repository's exact Git links. West fetches the other five pinned
+repositories: CMSIS, CMSIS 6, NXP HAL, MCUboot and Mbed TLS. Use the targeted
+`west update` command in the README; an unqualified update can move the two
+submodule checkouts. `scripts/fw.py prepare` verifies every revision, each
+submodule link and clean checkouts; `check`, `app` and `bootloader` never fetch
+repositories. The bootloader and application share one partition
 overlay and signing key; changing either requires a paired image and recovery
 review. Python packages come from Zephyr's pinned build requirements and
-MCUboot's requirements after `west update`; the developer supplies the Arm GNU
-14.2.rel1 toolchain separately. See the README for exact commands.
+MCUboot's requirements after dependency checkout; the developer supplies the
+Arm GNU 14.2.rel1 toolchain separately. See the README for exact commands.
 
 The user requires an upstream-compatible `gs_usb` implementation. The app has
 only CANnectivity's vendor interface and its existing bulk endpoints. Local
@@ -62,7 +67,8 @@ Windows build host has been checked with this portable workflow.
 | Mbed TLS | Crypto dependency in the Zephyr/MCUboot build |
 | `platform/mcxn236_control` | Project-owned entry, mailbox and bootloader USB/flash integration; not downloaded |
 
-The exact Git revisions and source URLs are in `west.yml`. Build tools are
+Exact revisions and source URLs are in `west.yml`; `.gitmodules` also records
+the two fork URLs and update branches. Build tools are
 Python 3.12+, West 1.5.0, CMake 3.30+, Ninja 1.12+ and Arm GNU 14.2.rel1.
 Python build packages come from the pinned Zephyr and MCUboot requirements.
 The optional `scripts/requirements-lab.txt` supplies PyUSB/libusb, pyserial

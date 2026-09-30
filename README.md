@@ -25,15 +25,16 @@ external CAN bus still needs hardware and electrical qualification.
 ## Portable workspace and build (Windows verified)
 
 Install Python 3.12+, Git, CMake 3.30+, Ninja 1.12+ and Arm GNU Toolchain
-14.2.rel1. The compiler must be supplied separately; West downloads source
-repositories only. Create and activate a Python virtual environment, then run:
+14.2.rel1. The compiler must be supplied separately. Clone this repository,
+create and activate a Python virtual environment, then run:
 
 ```text
 python -m pip install -r scripts/requirements-bootstrap.txt
+git submodule update --init
 mkdir .west
 west config --local manifest.path .
 west config --local manifest.file west.yml
-west update
+west update cmsis cmsis_6 hal_nxp mcuboot mbedtls
 python -m pip install -r .deps/zephyr/zephyr/scripts/requirements-base.txt
 python -m pip install -r .deps/zephyr/bootloader/mcuboot/scripts/requirements.txt
 python scripts/fw.py prepare
@@ -41,11 +42,16 @@ python scripts/fw.py bootloader --toolchain /path/to/arm-gnu-toolchain --key /pa
 python scripts/fw.py app --toolchain /path/to/arm-gnu-toolchain --key /path/to/development.pem
 ```
 
-The `west.yml` manifest pins seven source repositories to exact commits under
-ignored `.deps/`. `west update` is the sole repository download step. The
-portable `scripts/fw.py` builder checks revisions and requires clean pinned
-dependency checkouts; it does not download or install
-dependencies. Run `python scripts/fw.py check` for a read-only check. If CMake
+Zephyr and CANnectivity are submodules of the public `Swamy-BV` forks at exact
+tested commits. Their `.gitmodules` entries name the forks' `development`
+branches for intentional future updates; normal `git submodule update --init`
+uses the exact commits recorded by this firmware repository. The `west.yml`
+manifest pins those same commits and five additional source repositories under
+`.deps/`. Update only those five with West; an unqualified `west update` can
+move the two submodule checkouts away from the recorded Git links. The portable
+`scripts/fw.py` builder checks that the submodule links, manifest revisions and
+clean dependency checkouts agree; it does not download or install dependencies.
+Run `python scripts/fw.py check` for a read-only check. If CMake
 or Ninja is installed but not on `PATH`, pass `--cmake` or `--ninja` with its
 executable path. Set `GNUARMEMB_TOOLCHAIN_PATH` instead of `--toolchain` if
 preferred. The supported first board profile is `frdm_mcxn236`; other MCUs

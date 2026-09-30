@@ -3,7 +3,7 @@
 manifest:
   projects:
     - name: zephyr
-      url: https://github.com/zephyrproject-rtos/zephyr.git
+      url: https://github.com/Swamy-BV/zephyr.git
       revision: 684c9e8f32e4373a21098559f748f06915f950c9
       path: .deps/zephyr/zephyr
     - name: cmsis
@@ -27,7 +27,7 @@ manifest:
       revision: a3e190fe44c78d1ba67f55979e1257328cc7d0d8
       path: .deps/zephyr/modules/crypto/mbedtls
     - name: cannectivity
-      url: https://github.com/CANnectivity/cannectivity.git
+      url: https://github.com/Swamy-BV/cannectivity.git
       revision: 61be4896de6cf96daed5dd3dd8a46de53ef43641
       path: .deps/cannectivity
   self:

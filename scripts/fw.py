@@ -16,6 +16,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "west.yml"
+SUBMODULES = {"zephyr", "cannectivity"}
 LAB_VID = 0x1FC9
 LAB_PID = 0x00A2
 
@@ -45,13 +46,25 @@ def check_revisions(entries):
     for name, entry in entries.items():
         checkout = ROOT / entry["path"]
         if not (checkout / ".git").exists():
-            raise RuntimeError(f"Missing {name}: run 'west update' from the firmware root")
+            command = "git submodule update --init" if name in SUBMODULES else f"west update {name}"
+            raise RuntimeError(f"Missing {name}: run '{command}' from the firmware root")
         actual = run("git", "rev-parse", "HEAD", cwd=checkout, capture=True)
         if actual != entry["revision"]:
-            raise RuntimeError(f"{name} is at {actual}; expected {entry['revision']}. Run 'west update'.")
+            raise RuntimeError(f"{name} is at {actual}; expected {entry['revision']}.")
         dirty = run("git", "status", "--porcelain", cwd=checkout, capture=True)
         if dirty:
             raise RuntimeError(f"Unexpected edits in pinned dependency {name}: {dirty}")
+        if name in SUBMODULES:
+            gitlink = run("git", "rev-parse", f":{entry['path']}", cwd=ROOT, capture=True)
+            if gitlink != entry["revision"]:
+                raise RuntimeError(f"{name} submodule pointer {gitlink} differs from west.yml")
+            section = f"submodule.{entry['path']}"
+            url = run("git", "config", "-f", ROOT / ".gitmodules", "--get", f"{section}.url",
+                      cwd=ROOT, capture=True)
+            branch = run("git", "config", "-f", ROOT / ".gitmodules", "--get",
+                         f"{section}.branch", cwd=ROOT, capture=True)
+            if url != entry["url"] or branch != "development":
+                raise RuntimeError(f"{name} submodule must track the development fork")
 
 
 def prepare():
@@ -118,7 +131,7 @@ def sha256(path):
 
 
 def project_source_hashes():
-    files = [ROOT / "west.yml"]
+    files = [ROOT / "west.yml", ROOT / ".gitmodules"]
     for directory in ("board", "platform", "scripts"):
         files.extend(path for path in (ROOT / directory).rglob("*") if path.is_file())
     return {

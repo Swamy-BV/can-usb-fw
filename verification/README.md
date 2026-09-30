@@ -1,5 +1,11 @@
 # Verification record
 
+- The two public fork `development` branches and matching Git submodule links
+  were verified at the pinned Zephyr and CANnectivity commits. Targeted West
+  update of the five support modules, dependency revision check and both app
+  and MCUboot builds passed. See `submodule-setup/README.md` and retained build
+  result JSON files. These are build checks; no board was flashed in this change.
+
 - The current clean-upstream app/MCUboot pair passed EP0 entry, MCUboot's
   standard runtime DETACH and DFU slot-1 download, signed-image activation,
   corrupted-image rejection, full-serial identity in both modes, and return
