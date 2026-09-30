@@ -9,6 +9,9 @@ and the small upstream compatibility delta in `patches`.
 
 See [project setup](docs/PROJECT-SETUP.md) for module ownership, the MCU port
 rule, and the next integration gates.
+The first [MCXN236 controller qualification](docs/MCXN236-QUALIFICATION.md)
+records current clock/timing limits and simultaneous internal loopback; it does
+not establish a physical CAN data rate.
 
 The intended product is **ELROOT CANFD (2 channel)**. MCXN236 has two FlexCAN
 controllers. This build maps USB channel 0 to FlexCAN1 and channel 1 to

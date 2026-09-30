@@ -1,5 +1,14 @@
 # Verification record
 
+- MCXN236-only timing pass: the connected board enumerated at USB high speed.
+  At 1 Mbit/s nominal, its 50/48 MHz FlexCAN clocks accepted the data-phase
+  settings in `mcu-timing-internal.json`; both channels simultaneously
+  reconciled 256 FD64 RX frames and TX echoes each in internal loopback.
+  The current clocks cannot generate exact 12 Mbit/s under the advertised
+  minimum timing segments. This is controller configuration evidence, not
+  electrical CAN timing or sustained throughput qualification. See
+  `../docs/MCXN236-QUALIFICATION.md`.
+
 - Application 1.2.0 builds for `frdm_mcxn236`, is signed with the installed
   development key, and packages as a DFU 1.1 file. Offline wrong-key,
   tampered-image and suffix corruption checks pass.
