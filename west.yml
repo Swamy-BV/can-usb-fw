@@ -1,0 +1,34 @@
+# Firmware dependency manifest. All revisions are immutable commits.
+# The paths preserve the existing local workspace layout.
+manifest:
+  projects:
+    - name: zephyr
+      url: https://github.com/Swamy-BV/zephyr.git
+      revision: 684c9e8f32e4373a21098559f748f06915f950c9
+      path: .deps/zephyr/zephyr
+    - name: cmsis
+      url: https://github.com/zephyrproject-rtos/cmsis.git
+      revision: 512cc7e895e8491696b61f7ba8066b4a182569b8
+      path: .deps/zephyr/modules/hal/cmsis
+    - name: cmsis_6
+      url: https://github.com/zephyrproject-rtos/cmsis_6.git
+      revision: 30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74
+      path: .deps/zephyr/modules/hal/cmsis_6
+    - name: hal_nxp
+      url: https://github.com/zephyrproject-rtos/hal_nxp.git
+      revision: 2c2f28ac333e995d7279777409817c4b4f92c1ec
+      path: .deps/zephyr/modules/hal/nxp
+    - name: mcuboot
+      url: https://github.com/zephyrproject-rtos/mcuboot.git
+      revision: ee39e2d694bd827ffd1bebbce2f571a9154e6ec2
+      path: .deps/zephyr/bootloader/mcuboot
+    - name: mbedtls
+      url: https://github.com/zephyrproject-rtos/mbedtls.git
+      revision: a3e190fe44c78d1ba67f55979e1257328cc7d0d8
+      path: .deps/zephyr/modules/crypto/mbedtls
+    - name: cannectivity
+      url: https://github.com/Swamy-BV/cannectivity.git
+      revision: 878670becbf0a63d8353b2a8516995c560460bca
+      path: .deps/cannectivity
+  self:
+    path: .

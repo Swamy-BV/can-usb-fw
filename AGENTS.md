@@ -3,16 +3,15 @@
 This repository is a fresh CANnectivity-based firmware port for FRDM-MCXN236.
 It is the active device-firmware project. The sibling `can-analyzer-fw` is a
 historical ECU1/early-gs_usb implementation and must not supply build inputs.
-Read README.md before changes. All seven source dependencies are pinned Git
-submodules under `.deps/`. Zephyr and CANnectivity use public `Swamy-BV` forks
-with `develop` as their update branch and GitHub default. `.gitmodules` records
-all dependency URLs and paths; the Git links record exact tested revisions.
-Fork `develop` follows current `main`; the firmware stays
+Read README.md before changes. All seven firmware source dependencies are
+fetched by West at the exact revisions in `west.yml`; no Git submodules are
+used. Zephyr and CANnectivity come from public `Swamy-BV` forks. The firmware stays
 on Zephyr 4.4.0 for this release. CANnectivity is pinned at `878670b`, the
 last ancestor before legacy USB support was removed; the current `develop` tip
 is incompatible with Zephyr 4.4.0 USB APIs. Consider a Zephyr upgrade with the next
-major firmware release and qualify it before changing pinned Git links. Do not
-modify the original upstream repositories or run an unqualified submodule update.
+major firmware release and qualify it before changing `west.yml`. Do not
+modify the original upstream repositories or use branch-tip updates in place
+of the manifest pins.
 `scripts/fw.py` verifies clean pinned revisions and builds without fetching.
 CANnectivity and MCUboot checkouts must remain unmodified. Preserve their
 Apache-2.0 license and copyright notices when distributing firmware.

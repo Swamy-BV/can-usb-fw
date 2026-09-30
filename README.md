@@ -29,7 +29,11 @@ Install Python 3.12+, Git, CMake 3.30+, Ninja 1.12+ and Arm GNU Toolchain
 create and activate a Python virtual environment, then run:
 
 ```text
-git submodule update --init
+python -m pip install -r scripts/requirements-bootstrap.txt
+mkdir .west
+west config --local manifest.path .
+west config --local manifest.file west.yml
+west update
 python -m pip install -r .deps/zephyr/zephyr/scripts/requirements-base.txt
 python -m pip install -r .deps/zephyr/bootloader/mcuboot/scripts/requirements.txt
 python scripts/fw.py prepare
@@ -37,20 +41,19 @@ python scripts/fw.py bootloader --toolchain /path/to/arm-gnu-toolchain --key /pa
 python scripts/fw.py app --toolchain /path/to/arm-gnu-toolchain --key /path/to/development.pem
 ```
 
-All seven source dependencies are Git submodules at exact tested commits.
-Zephyr and CANnectivity use the public `Swamy-BV` forks; their `.gitmodules`
-entries name `develop` as the update branch. The other five use public
-Zephyr project repositories. `git submodule update --init` restores the exact
-commits recorded by this firmware repository without a West workspace or
-`west update`. CANnectivity is pinned to commit `878670b`, an
+All seven firmware source dependencies are fetched by West at the exact
+commits in `west.yml`. Zephyr and CANnectivity come from the public `Swamy-BV`
+forks; the other five come from Zephyr project repositories. CANnectivity is
+pinned to commit `878670b`, an
 ancestor of fork `develop` and the last commit before upstream removed the
 legacy USB stack. It is 65 commits behind the 2026-09-30 `develop` tip.
 The tip requires newer Zephyr USB APIs and does not compile with the pinned
 4.4.0 release. Zephyr stays at 4.4.0 for this release; consider an
 upgrade with the next major firmware release and qualify it before changing
-the pin. The portable `scripts/fw.py` builder checks that all seven submodule
-checkouts match their pinned Git links and are clean; it does not download or
-install dependencies.
+the pin. West places the checkouts under `.deps/`; `west update` follows the
+immutable manifest revisions rather than branch tips. The portable
+`scripts/fw.py` builder checks those revisions and clean checkouts; it does
+not download or install dependencies.
 Run `python scripts/fw.py check` for a read-only check. If CMake
 or Ninja is installed but not on `PATH`, pass `--cmake` or `--ninja` with its
 executable path. Set `GNUARMEMB_TOOLCHAIN_PATH` instead of `--toolchain` if
@@ -59,10 +62,8 @@ need their own board profiles.
 The same commands are intended for Linux and macOS; builds on those hosts
 have not yet been verified. Python build packages follow upstream version
 constraints rather than a hash-locked wheel set.
-Zephyr's own Python requirements may install the `west` package, but this
-project does not use a `.west` workspace. When migrating an existing checkout,
-move or remove its old `.west` directory before building: Zephyr's CMake will
-otherwise discover the stale West manifest configuration.
+The Arm compiler, development signing key, build outputs and local West
+configuration remain outside Git. There are no Git submodules in this project.
 
 Keep a compatible MCUboot P-256 **development** signing key outside Git. A
 new lab-only pair can be created with

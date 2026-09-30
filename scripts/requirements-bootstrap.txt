@@ -1,0 +1,2 @@
+# Workspace manager only. Install Zephyr and MCUboot requirements after checkout.
+west==1.5.0

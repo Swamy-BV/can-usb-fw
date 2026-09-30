@@ -1,5 +1,11 @@
 # Verification record
 
+- The active source setup now uses `west.yml` for all seven dependencies and
+  has no Git submodules. `west manifest --validate`, `west update`, the clean
+  revision check, and app/bootloader builds passed at the same source commits.
+  See `west-migration-20260930.json`. No image was flashed for this migration.
+  Older submodule records below are retained as historical evidence.
+
 - The two public fork branches originally named `development` and matching Git
   submodule links were verified at the pinned Zephyr and CANnectivity commits.
   The fork branches were later replaced with `develop` at current `main` and

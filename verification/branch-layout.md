@@ -36,3 +36,8 @@ use newer USB API signatures. Failed build logs are retained in
 `evidence/build-20260930T193133347642Z`. The compatible app and bootloader
 builds passed; see `verification/cannectivity-develop-20260930.json`. No new
 image was flashed or physically qualified.
+
+The later 2026-09-30 dependency migration removed every firmware Git submodule
+link and `.gitmodules`. `west.yml` now pins all seven sources, including the
+same Zephyr 4.4.0 and CANnectivity `878670b` commits. See
+`west-migration-20260930.json`; the fork branch layout above remains historical.
