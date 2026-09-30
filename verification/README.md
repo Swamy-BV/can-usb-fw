@@ -8,7 +8,9 @@
   minimum timing segments. NXP's MCXN236 SDK feature header also defines a
   10 Mbit/s CAN FD data-rate maximum. This is controller configuration
   evidence, not electrical CAN timing or sustained throughput qualification. See
-  `../docs/MCXN236-QUALIFICATION.md`.
+  `../docs/MCXN236-QUALIFICATION.md`. On 2026-09-29 the ELROOT target was
+  revised to up to 10 Mbit/s data phase; exact 10 Mbit/s on both channels and
+  physical-bus operation remain open.
 
 - Application 1.2.0 builds for `frdm_mcxn236`, is signed with the installed
   development key, and packages as a DFU 1.1 file. Offline wrong-key,

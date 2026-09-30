@@ -40,10 +40,17 @@ bitrate limit; its generic 8 Mbit/s fallback applies only when no device value
 is defined. An older [NXP MCXN adapter application note](https://www.nxp.com/docs/en/application-note/AN14253.pdf)
 also says 8 Mbit/s, so the SDK update is the newer, device-specific guidance.
 **10 Mbit/s is NXP's declared SDK ceiling, not a datasheet-guaranteed external
-bus measurement or proof of a hard silicon limit.** The proposed 12 Mbit/s
+bus measurement or proof of a hard silicon limit.** The former 12 Mbit/s
 data phase exceeds that ceiling. A different clock or transceiver alone does
 not establish support above it; seek explicit NXP confirmation before treating
 12 Mbit/s as possible on MCXN236.
+
+On 2026-09-29 the ELROOT product target was revised to **up to 10 Mbit/s CAN FD
+data phase at 1 Mbit/s nominal**, beginning with two channels. PEAK's advertised
+12 Mbit/s remains a comparison point, not this firmware's target. The present
+48 MHz source on channel 1 generated 9.6 Mbit/s in internal loopback, so an
+exact 10 Mbit/s configuration on both channels still needs clock work and
+external-bus qualification. Do not advertise 10 Mbit/s on both channels yet.
 
 ## Qualification still needed before selecting product hardware
 
