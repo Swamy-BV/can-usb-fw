@@ -27,18 +27,24 @@ host paced this run. Its elapsed time is **not** a CAN frame-rate measurement.
 With the current 50/48 MHz sources and five minimum time quanta per data bit,
 12 Mbit/s cannot be generated exactly on either controller. The mathematical
 configurable ceilings are 10 and 9.6 Mbit/s respectively. Those values are
-**timing configurations accepted in internal loopback**, not MCU electrical
-ratings or usable bus rates. NXP's generic FlexCAN documentation describes up
-to 8 Mbit/s; the higher accepted internal settings must not be advertised as
-qualified CAN operation. A source-clock change, MCXN236-specific controller
-limits and transmitter-delay compensation must be reviewed before concluding
-whether the MCU could meet a 12 Mbit/s product target with another PHY.
+**timing configurations accepted in internal loopback**, not qualified bus
+rates. The [MCXN23x datasheet, Rev 3](https://www.nxp.com/docs/en/data-sheet/MCXN23x.pdf)
+lists two CAN FD controllers but does not publish a CAN FD data-rate maximum.
+The pinned NXP MCUXpresso device feature header
+(`.deps/zephyr/modules/hal/nxp/mcux/mcux-sdk-ng/devices/MCX/MCXN/MCXN236/MCXN236_features.h`)
+defines `FSL_FEATURE_FLEXCAN_MAX_CANFD_BITRATE` as **10,000,000 bit/s** for
+MCXN236. NXP's FlexCAN driver uses that device-specific value as its CAN FD
+bitrate limit; its generic 8 Mbit/s fallback applies only when no device value
+is defined. Therefore the proposed 12 Mbit/s data phase exceeds the current
+NXP SDK limit for this MCU. A different clock or transceiver does not remove
+that published software limit. Seek explicit NXP confirmation before treating
+12 Mbit/s as possible on MCXN236.
 
 ## Qualification still needed before selecting product hardware
 
-1. Confirm the MCXN236-specific maximum FlexCAN clock, data timing and TDC
-   limits from NXP's reference manual or support, including both controllers
-   active and the intended payload/message-buffer configuration.
+1. Confirm the 10 Mbit/s SDK limit and applicable FlexCAN clock, data timing
+   and TDC limits with NXP, including both controllers active and the intended
+   payload/message-buffer configuration.
 2. Measure actual CAN_TX/CAN_RX timing at controller pins with suitable test
    equipment or a temporary known-good PHY/bus. Internal loopback does not
    exercise bus pins, transceiver delay, arbitration or errors.

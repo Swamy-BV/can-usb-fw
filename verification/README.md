@@ -5,8 +5,9 @@
   settings in `mcu-timing-internal.json`; both channels simultaneously
   reconciled 256 FD64 RX frames and TX echoes each in internal loopback.
   The current clocks cannot generate exact 12 Mbit/s under the advertised
-  minimum timing segments. This is controller configuration evidence, not
-  electrical CAN timing or sustained throughput qualification. See
+  minimum timing segments. NXP's MCXN236 SDK feature header also defines a
+  10 Mbit/s CAN FD data-rate maximum. This is controller configuration
+  evidence, not electrical CAN timing or sustained throughput qualification. See
   `../docs/MCXN236-QUALIFICATION.md`.
 
 - Application 1.2.0 builds for `frdm_mcxn236`, is signed with the installed
