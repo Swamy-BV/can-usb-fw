@@ -1,4 +1,4 @@
-"""Portable firmware preparation and build; dependency fetching belongs to west."""
+"""Portable firmware preparation and build from pinned Git submodules."""
 
 import argparse
 import hashlib
@@ -11,12 +11,17 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-import yaml
-
-
 ROOT = Path(__file__).resolve().parents[1]
-MANIFEST = ROOT / "west.yml"
-SUBMODULES = {"zephyr", "cannectivity"}
+SUBMODULE_PATHS = {
+    "zephyr": ".deps/zephyr/zephyr",
+    "cmsis": ".deps/zephyr/modules/hal/cmsis",
+    "cmsis_6": ".deps/zephyr/modules/hal/cmsis_6",
+    "hal_nxp": ".deps/zephyr/modules/hal/nxp",
+    "mcuboot": ".deps/zephyr/bootloader/mcuboot",
+    "mbedtls": ".deps/zephyr/modules/crypto/mbedtls",
+    "cannectivity": ".deps/cannectivity",
+}
+FORKS = {"zephyr", "cannectivity"}
 LAB_VID = 0x1FC9
 LAB_PID = 0x00A2
 
@@ -38,33 +43,34 @@ def run(*args, cwd=None, env=None, capture=False):
 
 
 def projects():
-    manifest = yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))["manifest"]
-    return {entry["name"]: entry for entry in manifest["projects"]}
+    entries = {}
+    for name, path in SUBMODULE_PATHS.items():
+        section = f"submodule.{path}"
+        url = run("git", "config", "-f", ROOT / ".gitmodules", "--get",
+                  f"{section}.url", cwd=ROOT, capture=True)
+        branch = run("git", "config", "-f", ROOT / ".gitmodules", "--get",
+                     f"{section}.branch", cwd=ROOT, capture=True) if name in FORKS else None
+        if name in FORKS and branch != "develop":
+            raise RuntimeError(f"{name} submodule must track the develop branch of the fork")
+        staged = run("git", "ls-files", "--stage", "--", path, cwd=ROOT, capture=True)
+        fields = staged.split()
+        if len(fields) != 4 or fields[0] != "160000" or fields[3] != path:
+            raise RuntimeError(f"{name} must have a pinned Git submodule link at {path}")
+        entries[name] = {"path": path, "url": url, "revision": fields[1]}
+    return entries
 
 
 def check_revisions(entries):
     for name, entry in entries.items():
         checkout = ROOT / entry["path"]
         if not (checkout / ".git").exists():
-            command = "git submodule update --init" if name in SUBMODULES else f"west update {name}"
-            raise RuntimeError(f"Missing {name}: run '{command}' from the firmware root")
+            raise RuntimeError(f"Missing {name}: run 'git submodule update --init' from the firmware root")
         actual = run("git", "rev-parse", "HEAD", cwd=checkout, capture=True)
         if actual != entry["revision"]:
             raise RuntimeError(f"{name} is at {actual}; expected {entry['revision']}.")
         dirty = run("git", "status", "--porcelain", cwd=checkout, capture=True)
         if dirty:
             raise RuntimeError(f"Unexpected edits in pinned dependency {name}: {dirty}")
-        if name in SUBMODULES:
-            gitlink = run("git", "rev-parse", f":{entry['path']}", cwd=ROOT, capture=True)
-            if gitlink != entry["revision"]:
-                raise RuntimeError(f"{name} submodule pointer {gitlink} differs from west.yml")
-            section = f"submodule.{entry['path']}"
-            url = run("git", "config", "-f", ROOT / ".gitmodules", "--get", f"{section}.url",
-                      cwd=ROOT, capture=True)
-            branch = run("git", "config", "-f", ROOT / ".gitmodules", "--get",
-                         f"{section}.branch", cwd=ROOT, capture=True)
-            if url != entry["url"] or branch != "develop":
-                raise RuntimeError(f"{name} submodule must track the develop branch of the fork")
 
 
 def prepare():
@@ -131,7 +137,7 @@ def sha256(path):
 
 
 def project_source_hashes():
-    files = [ROOT / "west.yml", ROOT / ".gitmodules"]
+    files = [ROOT / ".gitmodules"]
     for directory in ("board", "platform", "scripts"):
         files.extend(path for path in (ROOT / directory).rglob("*") if path.is_file())
     return {

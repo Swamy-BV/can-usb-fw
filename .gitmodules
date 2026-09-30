@@ -6,3 +6,18 @@
 	path = .deps/cannectivity
 	url = https://github.com/Swamy-BV/cannectivity.git
 	branch = develop
+[submodule ".deps/zephyr/modules/hal/cmsis"]
+	path = .deps/zephyr/modules/hal/cmsis
+	url = https://github.com/zephyrproject-rtos/cmsis.git
+[submodule ".deps/zephyr/modules/hal/cmsis_6"]
+	path = .deps/zephyr/modules/hal/cmsis_6
+	url = https://github.com/zephyrproject-rtos/cmsis_6.git
+[submodule ".deps/zephyr/modules/hal/nxp"]
+	path = .deps/zephyr/modules/hal/nxp
+	url = https://github.com/zephyrproject-rtos/hal_nxp.git
+[submodule ".deps/zephyr/bootloader/mcuboot"]
+	path = .deps/zephyr/bootloader/mcuboot
+	url = https://github.com/zephyrproject-rtos/mcuboot.git
+[submodule ".deps/zephyr/modules/crypto/mbedtls"]
+	path = .deps/zephyr/modules/crypto/mbedtls
+	url = https://github.com/zephyrproject-rtos/mbedtls.git
