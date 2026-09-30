@@ -28,8 +28,11 @@ specification.
 The application builds the clean pinned `cannectivity/app` directly. Zephyr and
 CANnectivity come from public `Swamy-BV` fork submodules. Their `develop`
 branches match current fork `main` and are the GitHub defaults. The firmware
-intentionally pins older, tested commits; normal submodule initialization uses
-the parent repository's exact Git links. West fetches the other five pinned
+intentionally pins older, tested commits, including Zephyr 4.4.0 for this
+release. Consider an upgrade with the next major firmware release and qualify
+it before changing the Git link and manifest revision. Normal submodule
+initialization uses the parent repository's exact Git links. West fetches the
+other five pinned
 repositories: CMSIS, CMSIS 6, NXP HAL, MCUboot and Mbed TLS. Use the targeted
 `west update` command in the README; an unqualified update can move the two
 submodule checkouts. `scripts/fw.py prepare` verifies every revision, each

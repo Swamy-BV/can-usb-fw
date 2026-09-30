@@ -46,8 +46,9 @@ Zephyr and CANnectivity are submodules of the public `Swamy-BV` forks at exact
 tested commits. Their `.gitmodules` entries name the forks' `develop` branches,
 which currently match each fork's `main` and are the GitHub default branches.
 Normal `git submodule update --init` uses the exact older commits recorded by
-this firmware repository; updating to the branch tips requires a separate
-firmware port and qualification. The `west.yml`
+this firmware repository. Zephyr stays at 4.4.0 for this release; consider an
+upgrade with the next major firmware release and qualify it before changing
+the pin. The `west.yml`
 manifest pins those same commits and five additional source repositories under
 `.deps/`. Update only those five with West; an unqualified `west update` can
 move the two submodule checkouts away from the recorded Git links. The portable

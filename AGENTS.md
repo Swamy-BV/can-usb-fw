@@ -7,8 +7,10 @@ Read README.md before changes. Zephyr and CANnectivity are pinned submodules of
 the public `Swamy-BV` forks under `.deps/`, with `develop` as their update
 branch and GitHub default. `.gitmodules` records their URLs and branches;
 `west.yml` records exact tested revisions and the five other West-managed
-source repositories. Fork `develop` follows current `main`; the firmware pins
-older tested commits and must not advance them without qualification. Do not
+source repositories. Fork `develop` follows current `main`; the firmware stays
+on Zephyr 4.4.0 for this release. Consider a Zephyr upgrade with the next
+major firmware release and qualify it before changing either pinned Git link
+or `west.yml`. Do not
 modify the original upstream repositories or run an unqualified `west update`.
 `scripts/fw.py` verifies clean pinned revisions and builds without fetching.
 CANnectivity and MCUboot checkouts must remain unmodified. Preserve their
