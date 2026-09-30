@@ -13,20 +13,49 @@ specification.
 
 | Location | Owner and purpose |
 | --- | --- |
-| `deps.lock.json` | Exact upstream revisions and compiler version |
-| `.deps/` | Ignored upstream checkouts, tools, Python environments and lab signing key |
+| `west.yml` | Sole source for exact upstream repository revisions and checkout paths |
+| `.west/` | Ignored local West workspace configuration |
+| `.deps/` | Ignored upstream checkouts, optional local toolchain and lab signing key |
 | `patches/` | Reviewable CANnectivity compatibility delta |
 | `platform/usb_guard/` | Local USB identity, DFU and Windows descriptor integration |
 | `board/` | FRDM-MCXN236 pins, channels, partitions and Kconfig overlays |
-| `scripts/` | Reproducible setup, build, package and lab probes |
+| `scripts/fw.py` | Portable revision/patch verification and app/bootloader build; never fetches repositories |
+| `scripts/` | DFU packaging and authorized lab probes |
 | `verification/` | Committed outcomes, including failed checks and hardware limits |
 | `build/`, `evidence/` | Ignored generated artifacts and full run logs |
 
 The application builds upstream `cannectivity/app` directly. The project does
-not fork Zephyr, CANnectivity or the NXP HAL. `setup.ps1` validates pinned
-revisions and the exact allowed patch. The bootloader and application share one
-partition overlay and signing key; changing either requires a paired image and
-recovery review.
+not fork Zephyr, CANnectivity or the NXP HAL. West fetches the seven pinned
+repositories. `scripts/fw.py prepare` verifies every revision and applies only
+the reviewed CANnectivity compatibility patch; `check`, `app` and `bootloader`
+never fetch repositories. The bootloader and application share one partition
+overlay and signing key; changing either requires a paired image and recovery
+review. Python packages come from Zephyr's pinned build requirements and
+MCUboot's requirements after `west update`; the developer supplies the Arm GNU
+14.2.rel1 toolchain separately. See the README for exact commands.
+The exact source commits and compiler version are pinned; upstream Python
+requirements specify minimum versions and are not yet hash-locked. Only the
+Windows build host has been checked with this portable workflow.
+
+## Code dependencies
+
+| Component | Pinned role |
+| --- | --- |
+| Zephyr 4.4.0 | RTOS, CAN/USB drivers, device model and build system |
+| CANnectivity | Apache-2.0 `gs_usb` application and CAN channel handling; two upstream files carry the reviewed local patch |
+| NXP HAL | MCXN236 device definitions and FlexCAN/USB peripheral drivers |
+| CMSIS and CMSIS 6 | Arm core support required by the Zephyr/NXP build |
+| MCUboot | Signed-image format, image validation and DFU recovery bootloader |
+| Mbed TLS | Crypto dependency in the Zephyr/MCUboot build |
+| `platform/usb_guard` | Our own DFU and WinUSB descriptor integration; not downloaded |
+
+The exact Git revisions and source URLs are in `west.yml`. Build tools are
+Python 3.12+, West 1.5.0, CMake 3.30+, Ninja 1.12+ and Arm GNU 14.2.rel1.
+Python build packages come from the pinned Zephyr and MCUboot requirements.
+The optional `scripts/requirements-lab.txt` supplies PyUSB/libusb, pyserial
+and python-can for USB/UART bench probes; Candle is a separate optional host
+tool. None of those lab packages are firmware runtime dependencies. The
+desktop viewer is a separate project and is not a firmware build dependency.
 
 ## MCU port rule
 
@@ -47,8 +76,9 @@ VID/PID `1FC9:00A2` and the development key cannot become production defaults.
 
 1. Replace the unconditional weak `fw_dfu_app_quiescent()` implementation with
    an authoritative CAN/TX stop state before treating DFU detach as interlocked.
-2. Give board selection, output paths and identity a named build profile so a
-   second MCU can be added without copying the MCXN236 build scripts.
+2. Add a second named board profile before porting to another MCU. The portable
+   builder currently supports the `frdm_mcxn236` profile only; do not reuse its
+   pin, clock, USB identity or partition overlays on another board.
 3. Test a signed update from the newly built matching MCUboot, including
    failed-image recovery and interrupted-transfer behavior. Its current binary
    has only been built; the board runs an older compatible bootloader.

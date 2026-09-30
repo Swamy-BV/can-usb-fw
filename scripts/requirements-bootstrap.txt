@@ -1,0 +1,2 @@
+# Workspace manager only. Install upstream build requirements after west update.
+west==1.5.0

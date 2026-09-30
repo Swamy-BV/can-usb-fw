@@ -19,28 +19,48 @@ FlexCAN0. Both can be operated in internal loopback. The FRDM board has one
 documented external CAN transceiver/connector; connecting channel 1 to an
 external CAN bus still needs hardware and electrical qualification.
 
-## Build on Windows
+## Portable workspace and build (Windows verified)
 
-Requirements: PowerShell 7, Git, CMake, Ninja, Python 3.12+, and Arm GNU
-Toolchain 14.2.rel1. The lab toolchain is installed under ignored
-`.deps/toolchains`; builds do not read the old firmware checkout. Keep a
-compatible MCUboot P-256 development signing key
-at `.deps/dfu-development.pem`; do not commit a private key. Use the same key
-as the installed lab bootloader when testing the current board.
+Install Python 3.12+, Git, CMake 3.30+, Ninja 1.12+ and Arm GNU Toolchain
+14.2.rel1. The compiler must be supplied separately; West downloads source
+repositories only. Create and activate a Python virtual environment, then run:
 
-```powershell
-pwsh -File scripts/setup.ps1 -PythonExecutable C:\path\to\python.exe
-pwsh -File scripts/build-bootloader.ps1 -ToolchainPath .deps/toolchains
-pwsh -File scripts/build.ps1 -ToolchainPath .deps/toolchains
+```text
+python -m pip install -r scripts/requirements-bootstrap.txt
+mkdir .west
+west config --local manifest.path .
+west config --local manifest.file west.yml
+west update
+python -m pip install -r .deps/zephyr/zephyr/scripts/requirements-base.txt
+python -m pip install -r .deps/zephyr/bootloader/mcuboot/scripts/requirements.txt
+python scripts/fw.py prepare
+python scripts/fw.py bootloader --toolchain /path/to/arm-gnu-toolchain --key /path/to/development.pem
+python scripts/fw.py app --toolchain /path/to/arm-gnu-toolchain --key /path/to/development.pem
 ```
 
-`setup.ps1` fetches the exact commits in `deps.lock.json` into ignored
-`.deps/` and applies `patches/cannectivity-elroot-port.patch`. The build writes
-the signed application to `build/standalone/frdm_mcxn236/zephyr/zephyr.signed.bin`, the
-standard DFU file to `build/standalone/frdm_mcxn236/zephyr/can-usb.dfu`, and the MCUboot
-binary to `build/standalone/mcuboot-frdm_mcxn236/zephyr/zephyr.bin`. Build logs and
-machine-readable results are under ignored `evidence/`; selected verification
-results are committed in `verification/`.
+The `west.yml` manifest pins seven source repositories to exact commits under
+ignored `.deps/`. `west update` is the sole repository download step. The
+portable `scripts/fw.py` builder checks revisions and the exact reviewable
+`patches/cannectivity-elroot-port.patch`; it does not download or install
+dependencies. Run `python scripts/fw.py check` for a read-only check. If CMake
+or Ninja is installed but not on `PATH`, pass `--cmake` or `--ninja` with its
+executable path. Set `GNUARMEMB_TOOLCHAIN_PATH` instead of `--toolchain` if
+preferred. The supported first board profile is `frdm_mcxn236`; other MCUs
+need their own board profiles.
+The same commands are intended for Linux and macOS; builds on those hosts
+have not yet been verified. Python build packages follow upstream version
+constraints rather than a hash-locked wheel set.
+
+Keep a compatible MCUboot P-256 **development** signing key outside Git. A
+new lab-only pair can be created with
+`python .deps/zephyr/bootloader/mcuboot/scripts/imgtool.py keygen -k .deps/dfu-development.pem -t ecdsa-p256`.
+An existing board accepts updates only from a key matching its installed
+bootloader. The build writes the signed application to
+`build/standalone/frdm_mcxn236/zephyr/zephyr.signed.bin`, the DFU package to
+`build/standalone/frdm_mcxn236/zephyr/can-usb.dfu`, and MCUboot to
+`build/standalone/mcuboot-frdm_mcxn236/zephyr/zephyr.bin`. Full build logs and
+machine-readable results are under ignored `evidence/`; selected outcomes are
+committed in `verification/`.
 
 The bootloader and application share the 432 KiB slot layout in
 `board/partitions.overlay`. The lab board currently has an MCUboot build that
@@ -52,9 +72,12 @@ can be updated through DFU when the installed bootloader and key match.
 
 On the authorized board only, with the app already running:
 
-```powershell
-.deps/python/Scripts/python.exe scripts/dfu-lab.py --image build/standalone/frdm_mcxn236/zephyr/can-usb.dfu --serial 3A1F978456DF8D06D535A9A5BD62C632 --evidence evidence/dfu-run
-.deps/python/Scripts/python.exe scripts/probe.py --serial 3A1F978456DF8D06D535A9A5BD62C632 --evidence evidence/usb-run --loopback --load-count 4096
+Install `scripts/requirements-lab.txt` in the same Python environment before
+running USB/UART probes. These packages are not needed to compile firmware.
+
+```text
+python scripts/dfu-lab.py --image build/standalone/frdm_mcxn236/zephyr/can-usb.dfu --serial <authorized-board-serial> --evidence evidence/dfu-run
+python scripts/probe.py --serial <authorized-board-serial> --evidence evidence/usb-run --loopback --load-count 4096
 ```
 
 The DFU checker validates the signed image and suffix, transfers over USB
