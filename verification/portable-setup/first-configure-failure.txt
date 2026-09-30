@@ -1,7 +1,0 @@
-First portable application configure, 2026-09-30:
-Zephyr CMake received Python3_EXECUTABLE with Windows backslashes.
-CMake Error at zephyr/cmake/modules/extensions.cmake:1899:
-  Invalid character escape '\d'.
-The configure exited nonzero. The builder was corrected to pass forward-slash
-paths into all CMake and Zephyr configuration arguments. A following app build
-and MCUboot build both passed; see README.md in this directory.

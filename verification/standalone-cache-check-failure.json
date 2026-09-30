@@ -1,4 +1,0 @@
-{
-  "status": "failed",
-  "error": "Build cache uses  instead of C:/dr/elroot/can-usb-fw/.deps/toolchains; remove the generated build directory and retry."
-}
