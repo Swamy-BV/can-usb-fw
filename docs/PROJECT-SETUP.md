@@ -19,8 +19,8 @@ specification.
 | `.deps/` | Seven ignored West checkouts, optional local toolchain and lab signing key |
 | `platform/mcxn236_control/` | Local EP0 entry command, MCUboot mailbox, WinUSB binding and slot-1 writer selection |
 | `board/` | FRDM-MCXN236 pins, channels, partitions and Kconfig overlays |
-| `scripts/fw.py` | Portable clean-revision verification and app/bootloader build; never fetches repositories |
-| `scripts/` | DFU packaging and authorized lab probes |
+| `CMakeLists.txt` | One entry point for the paired app and bootloader build |
+| `tools/dfu_suffix.c` | Small host tool used by CANnectivity's existing DFU CMake target |
 | `verification/` | Committed outcomes, including failed checks and hardware limits |
 | `build/`, `evidence/` | Ignored generated artifacts and full run logs |
 
@@ -30,9 +30,7 @@ pins older, tested commits, including Zephyr 4.4.0 for this release. Consider
 an upgrade with the next major firmware release and qualify it before changing
 manifest revisions. West fetches all seven pinned repositories: Zephyr,
 CANnectivity, CMSIS, CMSIS 6, NXP HAL, MCUboot and Mbed TLS.
-`scripts/fw.py prepare` verifies every revision and clean checkout; `check`,
-`app` and `bootloader` never fetch
-repositories. The bootloader and application share one partition
+The CMake build does not fetch repositories. The bootloader and application share one partition
 overlay and signing key; changing either requires a paired image and recovery
 review. Python packages come from Zephyr's pinned build requirements and
 MCUboot's requirements after dependency checkout; the developer supplies the
@@ -69,10 +67,9 @@ Windows build host has been checked with this portable workflow.
 Exact revisions and source URLs are in `west.yml`. Build tools are
 Python 3.12+, West 1.5.0, CMake 3.30+, Ninja 1.12+ and Arm GNU 14.2.rel1.
 Python build packages come from the pinned Zephyr and MCUboot requirements.
-The optional `scripts/requirements-lab.txt` supplies PyUSB/libusb, pyserial
-and python-can for USB/UART bench probes; Candle is a separate optional host
-tool. None of those lab packages are firmware runtime dependencies. The
-desktop viewer is a separate project and is not a firmware build dependency.
+The project has no Python build or lab scripts. Zephyr and MCUboot still use
+their own Python build tools. The desktop viewer is a separate project and is
+not a firmware build dependency.
 
 ## MCU port rule
 
@@ -85,8 +82,8 @@ non-Zephyr port may reuse the host protocol and acceptance checks, but it will
 need its own device stack and bootloader integration; this repository is not
 currently an RTOS-independent application core.
 
-Build output must record the selected board, toolchain, upstream revisions,
-image hash and signing-key identity without publishing the private key. Lab
+Verification records should capture the selected board, toolchain, upstream
+revisions, image hash and signing-key identity without publishing the private key. Lab
 VID/PID `1FC9:00A2` and the development key cannot become production defaults.
 
 ## Next engineering gates
@@ -96,7 +93,7 @@ VID/PID `1FC9:00A2` and the development key cannot become production defaults.
    does not expose an authoritative pending-TX drain check. The 500 ms grace
    period is a handoff delay, not proof that all queued TX completed.
 2. Add a second named board profile before porting to another MCU. The portable
-   builder currently supports the `frdm_mcxn236` profile only; do not reuse its
+   CMake entry point currently supports the `frdm_mcxn236` profile only; do not reuse its
    pin, clock, USB identity or partition overlays on another board.
 3. Test interrupted-transfer recovery. Signed update and corrupted-image
    rejection passed through the newly flashed matching MCUboot.

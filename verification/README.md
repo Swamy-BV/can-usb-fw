@@ -1,5 +1,10 @@
 # Verification record
 
+- The single-entry CMake build produced the paired MCUboot, signed app and
+  DFU file from one external PEM key. MCUboot imgtool verified the signature;
+  the DFU suffix CRC and payload match were checked. No image from this build
+  was flashed. See `cmake-build-20260930.json`.
+
 - The active source setup now uses `west.yml` for all seven dependencies and
   has no Git submodules. `west manifest --validate`, `west update`, the clean
   revision check, and app/bootloader builds passed at the same source commits.

@@ -9,8 +9,8 @@ contain a second CAN stack or a fork of the `gs_usb` wire protocol.
 | `west.yml` | Pins Zephyr 4.4.0, CANnectivity and five supporting source repositories |
 | `board/` | Two CAN channel mapping, USB settings and flash partitions |
 | `platform/mcxn236_control/` | Project C code for DFU entry, bootloader handoff and Windows USB binding |
-| `scripts/fw.py` | Checks pins and builds, signs and packages the app or bootloader |
-| `scripts/` other files | Optional board probes, DFU checks and lab utilities |
+| `CMakeLists.txt` | Builds both images and calls Zephyr/MCUboot signing |
+| `tools/dfu_suffix.c` | Adds the standard DFU suffix through CANnectivity's CMake target |
 | `verification/` | Retained build and hardware results, including failures |
 
 The application runs CANnectivity code from `.deps/cannectivity/app`. West
@@ -20,27 +20,30 @@ committed.
 
 ## Build on a new machine
 
-Install Python 3.12+, Git, CMake 3.30+, Ninja 1.12+ and Arm GNU Toolchain
-14.2.rel1. Create a Python virtual environment in the cloned repository, then:
+Install Python 3.12+, Git, CMake 3.30+, Ninja 1.12+, a host C compiler and
+Arm GNU Toolchain 14.2.rel1. Create a Python virtual environment in the cloned
+repository, then:
 
 ```text
-python -m pip install -r scripts/requirements-bootstrap.txt
+python -m pip install west==1.5.0
 mkdir .west
 west config --local manifest.path .
 west config --local manifest.file west.yml
 west update
 python -m pip install -r .deps/zephyr/zephyr/scripts/requirements-base.txt
 python -m pip install -r .deps/zephyr/bootloader/mcuboot/scripts/requirements.txt
-python scripts/fw.py bootloader --toolchain /path/to/arm-gnu-toolchain --key /path/to/development.pem
-python scripts/fw.py app --toolchain /path/to/arm-gnu-toolchain --key /path/to/development.pem
+cmake -S . -B build/fw -DFW_TOOLCHAIN_ROOT=<arm-toolchain-dir> -DFW_SIGNING_KEY=<private-p256.pem> -DFW_PYTHON_EXECUTABLE=<venv-python>
+cmake --build build/fw --config Release
 ```
 
-`west update` fetches the exact revisions in `west.yml`. `fw.py` does not
-download, install or flash anything. It verifies clean source checkouts,
-supplies the board and lab identity configuration, runs CMake/Ninja, and
-packages the signed application for DFU. See [project setup](docs/PROJECT-SETUP.md)
-for the build inputs and MCU port rule. The current build uses `fw.py`, not
-`west build` directly.
+`west update` fetches the exact revisions in `west.yml`. The one CMake build
+produces `build/fw/bootloader/zephyr/zephyr.bin`,
+`build/fw/app/zephyr/zephyr.signed.bin` and
+`build/fw/app/zephyr/zephyr.signed.bin.dfu`. Zephyr/MCUboot signs the app with
+the one private PEM key; CANnectivity's CMake target packages the DFU file.
+The key, toolchain and downloaded sources stay outside Git. The VID/PID
+`1FC9:00A2` in the FRDM profile is lab-only. `FW_VERSION` sets the app image
+version (default `1.2.0`). See [project setup](docs/PROJECT-SETUP.md).
 
 ## Current status
 
@@ -57,8 +60,6 @@ for the build inputs and MCU port rule. The current build uses `fw.py`, not
 - The desktop CAN viewer still uses ECU1/protobuf and does not yet speak this
   firmware's `gs_usb` protocol.
 
-The scripts for traffic probes, Candle checks, timing checks and DFU transfer
-are **lab tools**, not part of the firmware image or normal build. Their
-results do not qualify external CAN timing, production identity, signing key
-custody or power-loss recovery. CANnectivity is Apache-2.0 licensed; its
-license is retained in `LICENSE-CANNECTIVITY`.
+Historical lab results do not qualify external CAN timing, production
+identity, signing key custody or power-loss recovery. CANnectivity is
+Apache-2.0 licensed; its license is retained in `LICENSE-CANNECTIVITY`.

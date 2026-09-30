@@ -12,7 +12,11 @@ is incompatible with Zephyr 4.4.0 USB APIs. Consider a Zephyr upgrade with the n
 major firmware release and qualify it before changing `west.yml`. Do not
 modify the original upstream repositories or use branch-tip updates in place
 of the manifest pins.
-`scripts/fw.py` verifies clean pinned revisions and builds without fetching.
+The top-level `CMakeLists.txt` builds the paired bootloader and app without fetching.
+Use `west update` to synchronize source pins, then `cmake -S . -B build/fw` and
+`cmake --build build/fw --config Release` with the signing key and toolchain
+options documented in README.md. Keep one external PEM key and do not add
+project Python scripts for build or lab tasks.
 CANnectivity and MCUboot checkouts must remain unmodified. Preserve their
 Apache-2.0 license and copyright notices when distributing firmware.
 
