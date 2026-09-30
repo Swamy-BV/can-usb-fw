@@ -28,7 +28,7 @@ manifest:
       path: .deps/zephyr/modules/crypto/mbedtls
     - name: cannectivity
       url: https://github.com/Swamy-BV/cannectivity.git
-      revision: 61be4896de6cf96daed5dd3dd8a46de53ef43641
+      revision: 878670becbf0a63d8353b2a8516995c560460bca
       path: .deps/cannectivity
   self:
     path: .

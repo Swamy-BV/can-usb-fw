@@ -45,8 +45,12 @@ python scripts/fw.py app --toolchain /path/to/arm-gnu-toolchain --key /path/to/d
 Zephyr and CANnectivity are submodules of the public `Swamy-BV` forks at exact
 tested commits. Their `.gitmodules` entries name the forks' `develop` branches,
 which currently match each fork's `main` and are the GitHub default branches.
-Normal `git submodule update --init` uses the exact older commits recorded by
-this firmware repository. Zephyr stays at 4.4.0 for this release; consider an
+Normal `git submodule update --init` uses the exact commits recorded by
+this firmware repository. CANnectivity is pinned to commit `878670b`, an
+ancestor of fork `develop` and the last commit before upstream removed the
+legacy USB stack. It is 65 commits behind the 2026-09-30 `develop` tip.
+The tip requires newer Zephyr USB APIs and does not compile with the pinned
+4.4.0 release. Zephyr stays at 4.4.0 for this release; consider an
 upgrade with the next major firmware release and qualify it before changing
 the pin. The `west.yml`
 manifest pins those same commits and five additional source repositories under

@@ -8,7 +8,9 @@ the public `Swamy-BV` forks under `.deps/`, with `develop` as their update
 branch and GitHub default. `.gitmodules` records their URLs and branches;
 `west.yml` records exact tested revisions and the five other West-managed
 source repositories. Fork `develop` follows current `main`; the firmware stays
-on Zephyr 4.4.0 for this release. Consider a Zephyr upgrade with the next
+on Zephyr 4.4.0 for this release. CANnectivity is pinned at `878670b`, the
+last ancestor before legacy USB support was removed; the current `develop` tip
+is incompatible with Zephyr 4.4.0 USB APIs. Consider a Zephyr upgrade with the next
 major firmware release and qualify it before changing either pinned Git link
 or `west.yml`. Do not
 modify the original upstream repositories or run an unqualified `west update`.
