@@ -2,7 +2,7 @@
 param(
     [uint16]$VendorId=8137,
     [uint16]$ProductId=162,
-    [string]$Version='1.1.9',
+    [string]$Version='1.2.0',
     [string]$ToolchainPath='',
     [string]$KeyPath=''
 )
@@ -59,7 +59,7 @@ try {
     $env:ZEPHYR_TOOLCHAIN_VARIANT='gnuarmemb'
     $env:GNUARMEMB_TOOLCHAIN_PATH=$ToolchainPath
     $conf="$root/board/frdm_mcxn236.conf;$root/board/mcuboot.conf;$identity"
-    & $tools.cmake -S "$root/.deps/cannectivity/app" -B $target -G Ninja -DBOARD=frdm_mcxn236 "-DPython3_EXECUTABLE=$python" "-DZEPHYR_MODULES=$($modules -join ';')" "-DEXTRA_CONF_FILE=$conf" "-DEXTRA_DTC_OVERLAY_FILE=$root/board/partitions.overlay" 2>&1 | Tee-Object "$evidence/configure.log"
+    & $tools.cmake -S "$root/.deps/cannectivity/app" -B $target -G Ninja -DBOARD=frdm_mcxn236 "-DPython3_EXECUTABLE=$python" "-DZEPHYR_MODULES=$($modules -join ';')" "-DEXTRA_CONF_FILE=$conf" "-DEXTRA_DTC_OVERLAY_FILE=$root/board/partitions.overlay;$root/board/two-channel.overlay" 2>&1 | Tee-Object "$evidence/configure.log"
     if ($LASTEXITCODE) { throw 'MCX configure failed.' }
     & $tools.cmake --build $target 2>&1 | Tee-Object "$evidence/build.log"
     if ($LASTEXITCODE) { throw 'MCX build failed.' }
@@ -78,7 +78,7 @@ try {
     $result=@{
         status='build-passed'; profile='cannectivity-frdm-mcxn236'; version=$Version
         upstream_commit=$lock.cannectivity_commit; zephyr_commit=$lock.zephyr_commit
-        vid=$VendorId; pid=$ProductId; actual_channels=1
+        vid=$VendorId; pid=$ProductId; actual_channels=2; qualified_external_channels=0
         signed_sha256=(Get-FileHash $signed).Hash.ToLowerInvariant()
         dfu_sha256=(Get-FileHash $package).Hash.ToLowerInvariant()
         usb_enumeration_tested=$false; physical_can_qualified=$false; sources=$sources

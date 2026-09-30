@@ -7,10 +7,11 @@ bootloader. The app source comes from pinned CANnectivity; the ELROOT-specific
 USB/DFU integration lives in `platform/usb_guard`, board settings in `board`,
 and the small upstream compatibility delta in `patches`.
 
-The intended product is **ELROOT CANFD (2 channel)**. This board presently
-exposes **one actual CAN controller**. A second independent channel needs
-additional controller/transceiver hardware and target configuration. The
-adapter name does not establish two-channel capability.
+The intended product is **ELROOT CANFD (2 channel)**. MCXN236 has two FlexCAN
+controllers. This build maps USB channel 0 to FlexCAN1 and channel 1 to
+FlexCAN0. Both can be operated in internal loopback. The FRDM board has one
+documented external CAN transceiver/connector; connecting channel 1 to an
+external CAN bus still needs hardware and electrical qualification.
 
 ## Build on Windows
 
@@ -49,11 +50,18 @@ On the authorized board only, with the app already running:
 ```
 
 The DFU checker validates the signed image and suffix, transfers over USB
-EP0, then waits for runtime enumeration. The probe checks the vendor
-interface, endpoints, capabilities and CAN FD internal loopback. Its load is
-host-paced and is **not** a physical bus throughput or latency measurement.
+EP0, then waits for runtime enumeration. The probe checks both channels,
+vendor interface, endpoints, capabilities, CAN FD internal loopback and
+channel isolation. Its load count applies to **each** channel and is
+host-paced, so it is **not** a physical bus throughput or latency measurement.
 Do not run it against an unrelated USB device or use the lab VID/PID as a
 production identity.
+
+The optional `scripts/discover-candle.py` check uses a locally built
+`python-can-candle` 1.2.4 / `candle-api` 0.0.12 host environment whose device
+scanner includes the authorized lab ID. It opens both channels together and
+receives a CAN FD frame on each. The unmodified Candle scanner does not
+recognize this lab identity.
 
 ## Boundaries and licensing
 
@@ -63,7 +71,7 @@ upstream notices, and modification attribution with distributions. This
 project's patch remains separate from upstream source for review. The
 development key is for lab use only; production key custody, production USB
 identity, secure boot policy, bootloader self-update, power-loss recovery,
-second physical channel, hardware timestamps and external CAN bus
+second external CAN transceiver, hardware timestamps and external CAN bus
 qualification remain open. The USB protocol is `gs_usb`; this fresh port does
 not implement the desktop viewer's ECU1 protobuf contract or integrate its UI.
 

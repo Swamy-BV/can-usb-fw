@@ -1,16 +1,24 @@
 # Verification record
 
-- Application 1.1.9 builds for `frdm_mcxn236`, is signed with the installed
+- Application 1.2.0 builds for `frdm_mcxn236`, is signed with the installed
   development key, and packages as a DFU 1.1 file. Offline wrong-key,
   tampered-image and suffix corruption checks pass.
 - The USB DFU transfer completed on the authorized board, and a reset UART
-  log identifies MCUboot image version 1.1.9 and CANnectivity v1.3.0 with
-  one actual channel.
-- USB enumeration exposes one vendor CAN interface with three bulk endpoints
-  and a DFU runtime interface. The probe passed Classical CAN, CAN FD,
-  extended-ID, 64-byte payload and TX echo in controller internal loopback.
-  A bounded 4,096-frame FD64 run reconciled all 4,096 RX frames and all
-  4,096 TX echoes. It was host-paced at about 1,068 frames/s.
+  log identifies MCUboot image version 1.2.0 and CANnectivity v1.3.0 with
+  two FlexCAN channels.
+- USB enumeration exposes two CAN channels under one vendor interface with
+  three bulk endpoints, plus a DFU runtime interface. Channel 0 maps to
+  FlexCAN1 and channel 1 to FlexCAN0. The probe passed Classical CAN, CAN FD,
+  extended-ID, 64-byte payload and TX echo in internal loopback on each.
+  A bounded 4,096-frame FD64 run per channel reconciled every RX frame and TX
+  echo while checking channel IDs. It was host-paced; see `usb-loopback.json`.
+- A locally modified Candle scanner discovered two channels. `python-can`
+  opened both through Candle at once and received a CAN FD frame on each;
+  see `candle-two-channel.json`.
+- Opening channel 0 and then channel 1 as separate Candle bus objects in one
+  process failed to reopen the device after the first close. The result is
+  retained in `candle-sequential-open-failure.json`. A single two-channel bus
+  object opened and received on both successfully.
 - The separate MCUboot build is a build check only. The board still runs its
   previously installed, compatible MCUboot; the newly built bootloader binary
   was not flashed.
@@ -23,9 +31,10 @@
   prints the latest boot section with replacement-safe encoding. The final
   command exits successfully and its capture is `board-boot-log.txt`.
 
-These results do not qualify a physical CAN bus, second controller, hardware
+These results do not qualify a physical CAN bus, second external transceiver, hardware
 timestamp accuracy, full bus speed, production update security or power-loss
 recovery. Windows Candle 1.2.4 discovers the upstream CANnectivity interface,
 but its local adapter treats CANnectivity's header-only TX echo as a zero-data
-CAN frame; a direct libusb probe validates the echo semantics. Windows host
-library interoperability remains a separate task.
+CAN frame. The new Candle test validates channel opening and RX traffic but
+does not validate its TX echo presentation. Windows host echo interoperability
+remains a separate task.

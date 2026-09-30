@@ -1,0 +1,19 @@
+{
+  "check": "CANDLE-DISCOVERY",
+  "status": "passed",
+  "serial": "3A1F978456DF8D06D535A9A5BD62C632",
+  "vid": 8137,
+  "pid": 162,
+  "candle_version": "1.2.4",
+  "script_sha256": "768058b588a1a4b4b26901cbe4a261cf28c27b00c1a97e95168bb92e58ea778a",
+  "extension_sha256": "56796a50033dad802db781967fe053bea5e8e0cec8d723b59918493df3603c21",
+  "channels": 2,
+  "opened_channels": [
+    0,
+    1
+  ],
+  "received_channels": [
+    0,
+    1
+  ]
+}

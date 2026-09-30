@@ -3,7 +3,7 @@
   "status": "transfer-and-runtime-return-passed",
   "serial": "3A1F978456DF8D06D535A9A5BD62C632",
   "negative_signature": false,
-  "payload_sha256": "63e95ac3c9a1b98e5f1b7b0aa84cc393d1afdc500613555471d61a6075e6c15e",
+  "payload_sha256": "f7998335d52cc9164d34d2f244e5046a8039926704eb3513137dd685370d3950",
   "script_sha256": "cb48e1f8a2102e3d02ca973f369981776425b3302cc22b15932311b7f38086f6",
   "statuses": [
     {
@@ -507,6 +507,12 @@
     {
       "block": 83,
       "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 84,
+      "status": 0,
       "state": 8,
       "poll_ms": 8
     }
@@ -516,7 +522,7 @@
   "dfu_interface": 0,
   "target_alternate": 1,
   "transfer_size": 1024,
-  "bytes": 84443,
-  "blocks": 83,
-  "seconds": 3.25
+  "bytes": 85279,
+  "blocks": 84,
+  "seconds": 3.4530000000086147
 }

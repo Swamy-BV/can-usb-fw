@@ -1,0 +1,15 @@
+{
+  "check": "CANDLE-DISCOVERY",
+  "status": "failed",
+  "serial": "3A1F978456DF8D06D535A9A5BD62C632",
+  "vid": 8137,
+  "pid": 162,
+  "candle_version": "1.2.4",
+  "script_sha256": "cc5b326d41157291a599352a9401d304a5f601cb60257d103d626742f7d43ba2",
+  "extension_sha256": "56796a50033dad802db781967fe053bea5e8e0cec8d723b59918493df3603c21",
+  "channels": 2,
+  "opened_channels": [
+    0
+  ],
+  "error": "RuntimeError('Cannot open device')"
+}

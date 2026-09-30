@@ -1,4 +1,4 @@
-"""Probe the ELROOT lab gs_usb profile through libusb; optionally exercise CAN loopback.
+"""Probe both MCXN236 gs_usb channels through libusb and exercise internal loopback.
 
 The Linux kernel gs_usb driver defines this host contract. This tool never
 binds a kernel driver or changes another USB device. --loopback changes CAN
@@ -26,6 +26,7 @@ def main():
     parser.add_argument('--serial', required=True)
     parser.add_argument('--evidence', type=Path, required=True)
     parser.add_argument('--loopback', action='store_true')
+    parser.add_argument('--expect-channels', type=int, default=2)
     parser.add_argument('--load-count', type=int, default=0,
                         help='Host-paced FD64 internal-loopback frames (1..4096)')
     args = parser.parse_args()
@@ -69,8 +70,8 @@ def main():
         report['channels'] = channels
         report['software_version'], report['hardware_version'] = struct.unpack_from('<II', config, 4)
         report['checks'].append('host-format-and-device-config')
-        if channels < 1 or channels > 2:
-            raise AssertionError('Unexpected actual channel count')
+        if channels != args.expect_channels:
+            raise AssertionError(f'Expected {args.expect_channels} channels, found {channels}')
         timing = []
         for channel in range(channels):
             base = struct.unpack('<10I', query(4, channel, 40))
@@ -89,94 +90,106 @@ def main():
         report['checks'].append('per-channel-timing-and-capabilities')
 
         if args.loopback:
-            if not (timing[0]['features'] & 0x102) == 0x102:
-                raise AssertionError('Controller does not advertise FD loopback')
-            # FRDM controller has a 50 MHz CAN clock. Use 100 and 25 time
-            # quanta for 500 kbit/s nominal and 2 Mbit/s data respectively.
-            clock = timing[0]['clock_hz']
-            if clock != 50_000_000:
-                raise AssertionError(f'Unexpected FRDM CAN clock: {clock}')
-            nominal = (39, 40, 20, 4, 1)
-            data = (9, 10, 5, 4, 1)
-            command(1, 0, struct.pack('<5I', *nominal))
-            command(10, 0, struct.pack('<5I', *data))
-            command(2, 0, struct.pack('<2I', 1, 0x102))
+            started = []
             try:
+                for channel_index, entry in enumerate(timing):
+                    if (entry['features'] & 0x102) != 0x102:
+                        raise AssertionError(f'Channel {channel_index} lacks FD loopback')
+                    clock = entry['clock_hz']
+                    if clock == 50_000_000:
+                        nominal, data = (39, 40, 20, 4, 1), (9, 10, 5, 4, 1)
+                    elif clock == 48_000_000:
+                        nominal, data = (19, 48, 28, 4, 1), (3, 12, 8, 4, 1)
+                    else:
+                        raise AssertionError(f'Unexpected channel {channel_index} clock {clock}')
+                    command(1, channel_index, struct.pack('<5I', *nominal))
+                    command(10, channel_index, struct.pack('<5I', *data))
+                    command(2, channel_index, struct.pack('<2I', 1, 0x102))
+                    started.append(channel_index)
                 out_endpoint = 0x02
-                samples = [(0x123, 8, 0, bytes(range(8))),
-                           (0x123, 9, 6, bytes(range(12))),
-                           (0x80012345, 15, 6, bytes(range(64)))]
-                for can_id, dlc, frame_flags, payload in samples:
-                    frame = struct.pack('<IIBBBB', 0, can_id, dlc, 0, frame_flags, 0)
-                    frame += payload + bytes(64 - len(payload))
-                    if device.write(out_endpoint, frame, timeout=2000) != 76:
-                        raise AssertionError('Short bulk OUT')
-                    seen = set()
-                    deadline = time.monotonic() + 3
-                    while time.monotonic() < deadline and seen != {0, 0xFFFFFFFF}:
-                        try:
-                            raw = bytes(device.read(EP_IN, 76, timeout=300))
-                        except usb.core.USBTimeoutError:
-                            continue
-                        if len(raw) < 12:
-                            raise AssertionError(f'Short RX/echo frame: {len(raw)}')
-                        echo, actual_id, actual_dlc, channel, flags, reserved = struct.unpack_from('<IIBBBB', raw)
-                        if echo == 0:
-                            # CANnectivity emits an echo-id confirmation with
-                            # zeroed frame fields; the host retains TX content.
-                            if (actual_id, actual_dlc, channel, flags & 6, reserved) != \
-                               (0, 0, 0, frame_flags, 0):
-                                raise AssertionError(f'Echo mismatch: {raw.hex()}')
-                        elif (actual_id, actual_dlc, channel, flags & 6, reserved,
-                              raw[12:12 + len(payload)]) != \
-                             (can_id, dlc, 0, frame_flags, 0, payload):
-                            raise AssertionError(f'Frame mismatch: {raw.hex()}')
-                        seen.add(echo)
-                    if seen != {0, 0xFFFFFFFF}:
-                        raise AssertionError(f'Expected RX and TX echo, got {seen}')
-                report['checks'].append('classical-fd-extended-64-byte-loopback-and-echo')
-                if args.load_count:
-                    start_time = time.perf_counter()
-                    for start in range(0, args.load_count, 8):
-                        stop = min(start + 8, args.load_count)
-                        for sequence in range(start, stop):
-                            payload = sequence.to_bytes(4, 'little') + bytes([sequence & 255]) * 60
-                            packet = struct.pack('<IIBBBB', sequence + 1, 0x300, 15, 0, 6, 0) + payload
-                            if device.write(out_endpoint, packet, timeout=2000) != 76:
-                                raise AssertionError(f'Short load OUT at {sequence}')
-                        seen_rx, seen_echo = set(), set()
-                        for _ in range(2 * (stop - start)):
-                            raw = bytes(device.read(EP_IN, 80, timeout=2000))
+                for channel_index in range(channels):
+                    samples = [(0x123 + channel_index, 8, 0, bytes(range(8))),
+                               (0x123 + channel_index, 9, 6, bytes(range(12))),
+                               (0x80012345 + channel_index, 15, 6, bytes(range(64)))]
+                    for can_id, dlc, frame_flags, payload in samples:
+                        frame = struct.pack('<IIBBBB', 0, can_id, dlc, channel_index,
+                                            frame_flags, 0)
+                        frame += payload + bytes(64 - len(payload))
+                        if device.write(out_endpoint, frame, timeout=2000) != 76:
+                            raise AssertionError('Short bulk OUT')
+                        seen = set()
+                        deadline = time.monotonic() + 3
+                        while time.monotonic() < deadline and seen != {0, 0xFFFFFFFF}:
+                            try:
+                                raw = bytes(device.read(EP_IN, 76, timeout=300))
+                            except usb.core.USBTimeoutError:
+                                continue
                             if len(raw) < 12:
-                                raise AssertionError(f'Short load IN: {len(raw)}')
-                            echo, can_id, dlc, channel, flags, reserved = struct.unpack_from('<IIBBBB', raw)
-                            if channel != 0 or reserved != 0:
-                                raise AssertionError(f'Load channel/reserved mismatch: {raw.hex()}')
-                            if echo == 0xFFFFFFFF:
-                                if len(raw) < 76 or (can_id, dlc, flags & 6) != (0x300, 15, 6):
-                                    raise AssertionError(f'Load RX header mismatch: {raw.hex()}')
-                                sequence = int.from_bytes(raw[12:16], 'little')
-                                if not start <= sequence < stop or raw[16:76] != bytes([sequence & 255]) * 60:
-                                    raise AssertionError(f'Load RX payload mismatch: {sequence}')
-                                if sequence in seen_rx:
-                                    raise AssertionError(f'Duplicate load RX {sequence}')
-                                seen_rx.add(sequence)
-                            else:
-                                sequence = echo - 1
-                                if not start <= sequence < stop or sequence in seen_echo:
-                                    raise AssertionError(f'Unexpected load echo {echo}')
-                                if (can_id, dlc, flags & 6) != (0, 0, 6):
-                                    raise AssertionError(f'Load echo header mismatch: {raw.hex()}')
-                                seen_echo.add(sequence)
-                        if seen_rx != set(range(start, stop)) or seen_echo != set(range(start, stop)):
-                            raise AssertionError(f'Load window incomplete {start}:{stop}')
-                    elapsed = time.perf_counter() - start_time
-                    report['load'] = {'requested': args.load_count, 'rx_frames': args.load_count,
-                                      'tx_echoes': args.load_count, 'seconds': elapsed,
-                                      'host_paced_frames_per_second': args.load_count / elapsed}
-                    report['checks'].append('bounded-fd64-load-rx-and-echo-reconciled')
+                                raise AssertionError(f'Short RX/echo frame: {len(raw)}')
+                            echo, actual_id, actual_dlc, actual_channel, flags, reserved = \
+                                struct.unpack_from('<IIBBBB', raw)
+                            if echo == 0:
+                                # CANnectivity confirms the echo ID without repeating the payload.
+                                if (actual_id, actual_dlc, actual_channel, flags & 6, reserved) != \
+                                   (0, 0, channel_index, frame_flags, 0):
+                                    raise AssertionError(f'Echo mismatch: {raw.hex()}')
+                            elif (actual_id, actual_dlc, actual_channel, flags & 6, reserved,
+                                  raw[12:12 + len(payload)]) != \
+                                 (can_id, dlc, channel_index, frame_flags, 0, payload):
+                                raise AssertionError(f'Frame mismatch: {raw.hex()}')
+                            seen.add(echo)
+                        if seen != {0, 0xFFFFFFFF}:
+                            raise AssertionError(f'Expected RX and TX echo on {channel_index}, got {seen}')
+                report['checks'].append('per-channel-classical-fd-extended-64-byte-loopback-and-echo')
+                if args.load_count:
+                    report['load'] = []
+                    for channel_index in range(channels):
+                        start_time = time.perf_counter()
+                        can_id = 0x300 + channel_index
+                        for start in range(0, args.load_count, 8):
+                            stop = min(start + 8, args.load_count)
+                            for sequence in range(start, stop):
+                                payload = sequence.to_bytes(4, 'little') + bytes([sequence & 255]) * 60
+                                packet = struct.pack('<IIBBBB', sequence + 1, can_id, 15,
+                                                     channel_index, 6, 0) + payload
+                                if device.write(out_endpoint, packet, timeout=2000) != 76:
+                                    raise AssertionError(f'Short load OUT at {channel_index}:{sequence}')
+                            seen_rx, seen_echo = set(), set()
+                            for _ in range(2 * (stop - start)):
+                                raw = bytes(device.read(EP_IN, 80, timeout=2000))
+                                if len(raw) < 12:
+                                    raise AssertionError(f'Short load IN: {len(raw)}')
+                                echo, actual_id, dlc, actual_channel, flags, reserved = \
+                                    struct.unpack_from('<IIBBBB', raw)
+                                if actual_channel != channel_index or reserved != 0:
+                                    raise AssertionError(f'Load channel isolation failed: {raw.hex()}')
+                                if echo == 0xFFFFFFFF:
+                                    if len(raw) < 76 or (actual_id, dlc, flags & 6) != (can_id, 15, 6):
+                                        raise AssertionError(f'Load RX header mismatch: {raw.hex()}')
+                                    sequence = int.from_bytes(raw[12:16], 'little')
+                                    if not start <= sequence < stop or raw[16:76] != bytes([sequence & 255]) * 60:
+                                        raise AssertionError(f'Load RX payload mismatch: {sequence}')
+                                    if sequence in seen_rx:
+                                        raise AssertionError(f'Duplicate load RX {sequence}')
+                                    seen_rx.add(sequence)
+                                else:
+                                    sequence = echo - 1
+                                    if not start <= sequence < stop or sequence in seen_echo:
+                                        raise AssertionError(f'Unexpected load echo {echo}')
+                                    if (actual_id, dlc, flags & 6) != (0, 0, 6):
+                                        raise AssertionError(f'Load echo header mismatch: {raw.hex()}')
+                                    seen_echo.add(sequence)
+                            if seen_rx != set(range(start, stop)) or seen_echo != set(range(start, stop)):
+                                raise AssertionError(f'Load window incomplete {channel_index}:{start}:{stop}')
+                        elapsed = time.perf_counter() - start_time
+                        report['load'].append({'channel': channel_index, 'requested': args.load_count,
+                                               'rx_frames': args.load_count,
+                                               'tx_echoes': args.load_count, 'seconds': elapsed,
+                                               'host_paced_frames_per_second': args.load_count / elapsed})
+                    report['checks'].append('per-channel-bounded-fd64-load-rx-and-echo-reconciled')
             finally:
-                command(2, 0, struct.pack('<2I', 0, 0))
+                for channel_index in reversed(started):
+                    command(2, channel_index, struct.pack('<2I', 0, 0))
         report['status'] = 'passed'
     except Exception as error:
         report['error'] = repr(error)
