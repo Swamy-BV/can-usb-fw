@@ -30,14 +30,19 @@ configurable ceilings are 10 and 9.6 Mbit/s respectively. Those values are
 **timing configurations accepted in internal loopback**, not qualified bus
 rates. The [MCXN23x datasheet, Rev 3](https://www.nxp.com/docs/en/data-sheet/MCXN23x.pdf)
 lists two CAN FD controllers but does not publish a CAN FD data-rate maximum.
+NXP's [MCUXpresso SDK release notes](https://mcuxpresso.nxp.com/mcuxsdk/25.09.00-pvw1/html/_assets/boards/frdmmcxn236/mcuxsdk-frdmmcxn236.pdf)
+explicitly say the CAN FD maximum was updated to 10 Mbit/s for MCX Nx3x/Nx4x.
 The pinned NXP MCUXpresso device feature header
 (`.deps/zephyr/modules/hal/nxp/mcux/mcux-sdk-ng/devices/MCX/MCXN/MCXN236/MCXN236_features.h`)
 defines `FSL_FEATURE_FLEXCAN_MAX_CANFD_BITRATE` as **10,000,000 bit/s** for
 MCXN236. NXP's FlexCAN driver uses that device-specific value as its CAN FD
 bitrate limit; its generic 8 Mbit/s fallback applies only when no device value
-is defined. Therefore the proposed 12 Mbit/s data phase exceeds the current
-NXP SDK limit for this MCU. A different clock or transceiver does not remove
-that published software limit. Seek explicit NXP confirmation before treating
+is defined. An older [NXP MCXN adapter application note](https://www.nxp.com/docs/en/application-note/AN14253.pdf)
+also says 8 Mbit/s, so the SDK update is the newer, device-specific guidance.
+**10 Mbit/s is NXP's declared SDK ceiling, not a datasheet-guaranteed external
+bus measurement or proof of a hard silicon limit.** The proposed 12 Mbit/s
+data phase exceeds that ceiling. A different clock or transceiver alone does
+not establish support above it; seek explicit NXP confirmation before treating
 12 Mbit/s as possible on MCXN236.
 
 ## Qualification still needed before selecting product hardware
