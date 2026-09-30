@@ -91,7 +91,12 @@ MCUboot remain lab assets, not production release credentials.
 
 The desktop viewer still uses ECU1/protobuf and cannot acquire frames from
 this `gs_usb` firmware yet. Retiring the old *device application* is complete;
-retiring its repository or the separate bootloader repository is a distinct
-cleanup decision after their history and hardware recovery tooling are
-preserved. Second-channel external wiring, product signing/identity and
-electrical CAN qualification remain open.
+the old repositories remain in place only for historical links from
+`can-viewer` documentation and are not build inputs. Second-channel external
+wiring, product signing/identity and electrical CAN qualification remain open.
+
+The legacy firmware and separate bootloader projects were archived as local
+ZIPs under `../archives/` on 2026-09-30. Their Git history, working files,
+build outputs and evidence are included; downloaded `.deps` and private keys
+are omitted. The archive names, SHA-256 checksums and retained uncommitted
+file list are in `../archives/legacy-firmware-archives-20260930.json`.
