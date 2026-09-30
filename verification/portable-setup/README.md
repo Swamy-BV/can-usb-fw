@@ -1,5 +1,12 @@
 # West/portable builder migration — 2026-09-30
 
+Historical setup record. The current project uses Zephyr and CANnectivity fork
+submodules plus five West-managed repositories; see
+`../submodule-setup/README.md` and `../../README.md` for the current workflow.
+During the 2026-09-30 cleanup, `west manifest --validate` and
+`python scripts/fw.py check` both passed. No firmware source changed or board
+was flashed in this cleanup.
+
 `west.yml` now pins the seven Git source dependencies. `west manifest
 --validate` and `west list` passed against the existing workspace; `scripts/fw.py
 check` verified each checkout commit and the exact CANnectivity patch. West is
