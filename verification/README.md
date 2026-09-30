@@ -22,6 +22,15 @@
 - The separate MCUboot build is a build check only. The board still runs its
   previously installed, compatible MCUboot; the newly built bootloader binary
   was not flashed.
+- A clean application and MCUboot build used the Arm GNU 14.2.1 toolchain
+  copied under this project's ignored `.deps/toolchains`. Both CMake caches
+  point into `can-usb-fw`, and the resulting signed application was flashed
+  and rechecked with this project's Python, LinkServer and Candle tools.
+  `standalone-cutover.json` records the compiler paths and image hash.
+- The first standalone build-check attempt failed because the check assumed
+  CMake stored `CMAKE_C_COMPILER` as `FILEPATH`; the fresh application cache
+  stored it as `STRING`. The check now accepts both CMake cache types. The
+  failure is retained in `standalone-cache-check-failure.json`.
 - The initial fresh bootloader/app integration build failed at link because
   `flash_img_init` was wrapped when its MCUboot-specific wrapper was absent.
   The CMake guard now enables that wrapper only when `CONFIG_MCUBOOT=y`.

@@ -12,7 +12,10 @@ I: Jumping to the first image slot
 [00:00:00.000,000] [0m<dbg> gs_usb: gs_usb_interface_config: bInterfaceNumber = 0[0m
 [00:00:00.000,000] [0m<inf> main: CANnectivity firmware initialized with 2 channels[0m
 [00:00:00.003,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device suspend[0m
-[00:00:00.205,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device reset[0m
+[00:00:00.206,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device reset[0m
 [00:00:00.319,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device suspend[0m
-[00:00:01.930,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device reset[0m
-[00:00:01.993,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device configu
+[00:00:01.763,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device reset[0m
+[00:00:01.825,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device configured[0m
+[00:00:01.825,000] [0m<dbg> gs_usb: gs_usb_status_callback: EP IN addr = 0x81[0m
+[00:00:01.825,000] [0m<dbg> gs_usb: gs_usb_status_callback: EP OUT1 addr = 0x01[0m
+[00:00:01.825,000] [0m<dbg> gs_usb: gs_usb_status_callback: EP OUT2 addr = 0x02[0m

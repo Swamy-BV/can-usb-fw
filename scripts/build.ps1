@@ -36,7 +36,7 @@ $modules=@(
     "$root/.deps/cannectivity",
     "$root/platform/usb_guard"
 )
-$target="$root/build/frdm_mcxn236"
+$target="$root/build/standalone/frdm_mcxn236"
 $evidence="$root/evidence/build-$([DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ'))"
 New-Item -ItemType Directory -Force $target,$evidence | Out-Null
 $identity="$root/build/identity.conf"
@@ -61,6 +61,11 @@ try {
     $conf="$root/board/frdm_mcxn236.conf;$root/board/mcuboot.conf;$identity"
     & $tools.cmake -S "$root/.deps/cannectivity/app" -B $target -G Ninja -DBOARD=frdm_mcxn236 "-DPython3_EXECUTABLE=$python" "-DZEPHYR_MODULES=$($modules -join ';')" "-DEXTRA_CONF_FILE=$conf" "-DEXTRA_DTC_OVERLAY_FILE=$root/board/partitions.overlay;$root/board/two-channel.overlay" 2>&1 | Tee-Object "$evidence/configure.log"
     if ($LASTEXITCODE) { throw 'MCX configure failed.' }
+    $compilerLine=Select-String -LiteralPath "$target/CMakeCache.txt" -Pattern '^CMAKE_C_COMPILER:(FILEPATH|STRING)=' | Select-Object -First 1
+    $configuredCompiler=if ($compilerLine) { $compilerLine.Line.Split('=',2)[1].Replace('\','/') } else { '' }
+    if ($configuredCompiler -ne "$ToolchainPath/bin/arm-none-eabi-gcc.exe") {
+        throw "Build cache uses $configuredCompiler instead of $ToolchainPath; remove the generated build directory and retry."
+    }
     & $tools.cmake --build $target 2>&1 | Tee-Object "$evidence/build.log"
     if ($LASTEXITCODE) { throw 'MCX build failed.' }
     $signed="$target/zephyr/zephyr.signed.bin"

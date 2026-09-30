@@ -1,6 +1,8 @@
 # CAN USB firmware project
 
 This repository is a fresh CANnectivity-based firmware port for FRDM-MCXN236.
+It is the active device-firmware project. The sibling `can-analyzer-fw` is a
+historical ECU1/early-gs_usb implementation and must not supply build inputs.
 Read README.md before changes. Upstream CANnectivity and Zephyr modules are
 external, pinned dependencies under ignored `.deps/`; the patch in `patches/`
 is the complete upstream source delta. Preserve its Apache-2.0 license and

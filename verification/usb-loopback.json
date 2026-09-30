@@ -84,16 +84,16 @@
       "requested": 4096,
       "rx_frames": 4096,
       "tx_echoes": 4096,
-      "seconds": 3.8258597000094596,
-      "host_paced_frames_per_second": 1070.6090450702811
+      "seconds": 3.8334980999934487,
+      "host_paced_frames_per_second": 1068.475813254479
     },
     {
       "channel": 1,
       "requested": 4096,
       "rx_frames": 4096,
       "tx_echoes": 4096,
-      "seconds": 3.821736299985787,
-      "host_paced_frames_per_second": 1071.764161230913
+      "seconds": 3.8287303999823052,
+      "host_paced_frames_per_second": 1069.8063253602108
     }
   ]
 }

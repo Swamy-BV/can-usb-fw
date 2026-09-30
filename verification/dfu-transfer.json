@@ -3,7 +3,7 @@
   "status": "transfer-and-runtime-return-passed",
   "serial": "3A1F978456DF8D06D535A9A5BD62C632",
   "negative_signature": false,
-  "payload_sha256": "f7998335d52cc9164d34d2f244e5046a8039926704eb3513137dd685370d3950",
+  "payload_sha256": "f67dd9fcc8b5dd2ed4e5383639c5428b579f8ed4fe48b14a679b05c7bfe813ec",
   "script_sha256": "cb48e1f8a2102e3d02ca973f369981776425b3302cc22b15932311b7f38086f6",
   "statuses": [
     {
@@ -524,5 +524,5 @@
   "transfer_size": 1024,
   "bytes": 85279,
   "blocks": 84,
-  "seconds": 3.4530000000086147
+  "seconds": 3.235000000015134
 }

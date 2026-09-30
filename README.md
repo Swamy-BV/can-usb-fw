@@ -16,21 +16,23 @@ external CAN bus still needs hardware and electrical qualification.
 ## Build on Windows
 
 Requirements: PowerShell 7, Git, CMake, Ninja, Python 3.12+, and Arm GNU
-Toolchain 14.2.rel1. Keep a compatible MCUboot P-256 development signing key
+Toolchain 14.2.rel1. The lab toolchain is installed under ignored
+`.deps/toolchains`; builds do not read the old firmware checkout. Keep a
+compatible MCUboot P-256 development signing key
 at `.deps/dfu-development.pem`; do not commit a private key. Use the same key
 as the installed lab bootloader when testing the current board.
 
 ```powershell
 pwsh -File scripts/setup.ps1 -PythonExecutable C:\path\to\python.exe
-pwsh -File scripts/build-bootloader.ps1 -ToolchainPath C:\path\to\arm-gnu-toolchain
-pwsh -File scripts/build.ps1 -ToolchainPath C:\path\to\arm-gnu-toolchain
+pwsh -File scripts/build-bootloader.ps1 -ToolchainPath .deps/toolchains
+pwsh -File scripts/build.ps1 -ToolchainPath .deps/toolchains
 ```
 
 `setup.ps1` fetches the exact commits in `deps.lock.json` into ignored
 `.deps/` and applies `patches/cannectivity-elroot-port.patch`. The build writes
-the signed application to `build/frdm_mcxn236/zephyr/zephyr.signed.bin`, the
-standard DFU file to `build/frdm_mcxn236/zephyr/can-usb.dfu`, and the MCUboot
-binary to `build/mcuboot-frdm_mcxn236/zephyr/zephyr.bin`. Build logs and
+the signed application to `build/standalone/frdm_mcxn236/zephyr/zephyr.signed.bin`, the
+standard DFU file to `build/standalone/frdm_mcxn236/zephyr/can-usb.dfu`, and the MCUboot
+binary to `build/standalone/mcuboot-frdm_mcxn236/zephyr/zephyr.bin`. Build logs and
 machine-readable results are under ignored `evidence/`; selected verification
 results are committed in `verification/`.
 
@@ -45,7 +47,7 @@ can be updated through DFU when the installed bootloader and key match.
 On the authorized board only, with the app already running:
 
 ```powershell
-.deps/python/Scripts/python.exe scripts/dfu-lab.py --image build/frdm_mcxn236/zephyr/can-usb.dfu --serial 3A1F978456DF8D06D535A9A5BD62C632 --evidence evidence/dfu-run
+.deps/python/Scripts/python.exe scripts/dfu-lab.py --image build/standalone/frdm_mcxn236/zephyr/can-usb.dfu --serial 3A1F978456DF8D06D535A9A5BD62C632 --evidence evidence/dfu-run
 .deps/python/Scripts/python.exe scripts/probe.py --serial 3A1F978456DF8D06D535A9A5BD62C632 --evidence evidence/usb-run --loopback --load-count 4096
 ```
 
@@ -77,3 +79,19 @@ not implement the desktop viewer's ECU1 protobuf contract or integrate its UI.
 
 See `verification/README.md` for evidence and remaining host compatibility
 issues.
+
+## Project cutover
+
+This repository is the active MCXN236 firmware source and can build, sign,
+package, update and probe the two-channel lab application without reading
+`can-analyzer-fw`. The old firmware checkout is retained as historical ECU1
+work; its four uncommitted CANnectivity bring-up files are not needed by this
+repository. The development signing key and the board's currently installed
+MCUboot remain lab assets, not production release credentials.
+
+The desktop viewer still uses ECU1/protobuf and cannot acquire frames from
+this `gs_usb` firmware yet. Retiring the old *device application* is complete;
+retiring its repository or the separate bootloader repository is a distinct
+cleanup decision after their history and hardware recovery tooling are
+preserved. Second-channel external wiring, product signing/identity and
+electrical CAN qualification remain open.

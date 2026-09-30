@@ -23,7 +23,7 @@ $modules=@(
     "$workspace/modules/crypto/mbedtls",
     "$root/platform/usb_guard"
 )
-$target="$root/build/mcuboot-frdm_mcxn236"
+$target="$root/build/standalone/mcuboot-frdm_mcxn236"
 $evidence="$root/evidence/bootloader-$([DateTime]::UtcNow.ToString('yyyyMMddTHHmmssfffZ'))"
 New-Item -ItemType Directory -Force $target,$evidence | Out-Null
 $identity="$root/build/bootloader-identity.conf"
@@ -45,6 +45,11 @@ try {
     $conf="$root/board/mcuboot-bootloader.conf;$identity"
     & $tools.cmake -S "$workspace/bootloader/mcuboot/boot/zephyr" -B $target -G Ninja '-UCONFIG_BOOT_SIGNATURE_KEY_FILE' -DBOARD=frdm_mcxn236 "-DPython3_EXECUTABLE=$python" "-DZEPHYR_MODULES=$($modules -join ';')" "-DEXTRA_CONF_FILE=$conf" "-DEXTRA_DTC_OVERLAY_FILE=$root/board/partitions.overlay" 2>&1 | Tee-Object "$evidence/configure.log"
     if ($LASTEXITCODE) { throw 'MCUboot configure failed.' }
+    $compilerLine=Select-String -LiteralPath "$target/CMakeCache.txt" -Pattern '^CMAKE_C_COMPILER:(FILEPATH|STRING)=' | Select-Object -First 1
+    $configuredCompiler=if ($compilerLine) { $compilerLine.Line.Split('=',2)[1].Replace('\','/') } else { '' }
+    if ($configuredCompiler -ne "$ToolchainPath/bin/arm-none-eabi-gcc.exe") {
+        throw "Build cache uses $configuredCompiler instead of $ToolchainPath; remove the generated build directory and retry."
+    }
     & $tools.cmake --build $target 2>&1 | Tee-Object "$evidence/build.log"
     if ($LASTEXITCODE) { throw 'MCUboot build failed.' }
     $binary="$target/zephyr/zephyr.bin"
