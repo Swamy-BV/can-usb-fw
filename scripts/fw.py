@@ -63,8 +63,8 @@ def check_revisions(entries):
                       cwd=ROOT, capture=True)
             branch = run("git", "config", "-f", ROOT / ".gitmodules", "--get",
                          f"{section}.branch", cwd=ROOT, capture=True)
-            if url != entry["url"] or branch != "development":
-                raise RuntimeError(f"{name} submodule must track the development fork")
+            if url != entry["url"] or branch != "develop":
+                raise RuntimeError(f"{name} submodule must track the develop branch of the fork")
 
 
 def prepare():

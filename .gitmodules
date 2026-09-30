@@ -1,8 +1,8 @@
 [submodule ".deps/zephyr/zephyr"]
 	path = .deps/zephyr/zephyr
 	url = https://github.com/Swamy-BV/zephyr.git
-	branch = development
+	branch = develop
 [submodule ".deps/cannectivity"]
 	path = .deps/cannectivity
 	url = https://github.com/Swamy-BV/cannectivity.git
-	branch = development
+	branch = develop

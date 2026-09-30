@@ -14,7 +14,7 @@ specification.
 
 | Location | Owner and purpose |
 | --- | --- |
-| `.gitmodules` | Public fork URLs and `development` update branches for the Zephyr and CANnectivity submodules |
+| `.gitmodules` | Public fork URLs and `develop` update branches for the Zephyr and CANnectivity submodules |
 | `west.yml` | Exact tested revisions and checkout paths for all seven dependencies |
 | `.west/` | Ignored local West workspace configuration |
 | `.deps/` | Two tracked submodule links, five ignored West checkouts, optional local toolchain and lab signing key |
@@ -26,9 +26,10 @@ specification.
 | `build/`, `evidence/` | Ignored generated artifacts and full run logs |
 
 The application builds the clean pinned `cannectivity/app` directly. Zephyr and
-CANnectivity come from public `Swamy-BV` fork submodules; their `development`
-branches point to the tested commits. Normal submodule initialization uses the
-parent repository's exact Git links. West fetches the other five pinned
+CANnectivity come from public `Swamy-BV` fork submodules. Their `develop`
+branches match current fork `main` and are the GitHub defaults. The firmware
+intentionally pins older, tested commits; normal submodule initialization uses
+the parent repository's exact Git links. West fetches the other five pinned
 repositories: CMSIS, CMSIS 6, NXP HAL, MCUboot and Mbed TLS. Use the targeted
 `west update` command in the README; an unqualified update can move the two
 submodule checkouts. `scripts/fw.py prepare` verifies every revision, each

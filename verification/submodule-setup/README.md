@@ -1,5 +1,9 @@
 # Fork submodule setup — 2026-09-30
 
+This records the original setup. The fork branches were later renamed to
+`develop`, moved to the then-current `main` tips, and made GitHub defaults.
+The pinned firmware revisions below did not change; see `../branch-layout.md`.
+
 The parent `can-usb-fw` repository uses local branch `development`. Its remote
 was not pushed in this change. The following public fork branches were checked
 with `git ls-remote`; the original upstream repositories were not changed.

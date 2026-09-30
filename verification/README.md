@@ -1,7 +1,10 @@
 # Verification record
 
-- The two public fork `development` branches and matching Git submodule links
-  were verified at the pinned Zephyr and CANnectivity commits. Targeted West
+- The two public fork branches originally named `development` and matching Git
+  submodule links were verified at the pinned Zephyr and CANnectivity commits.
+  The fork branches were later replaced with `develop` at current `main` and
+  made GitHub defaults; the firmware links remain at the tested commits.
+  Targeted West
   update of the five support modules, dependency revision check and both app
   and MCUboot builds passed. See `submodule-setup/README.md` and retained build
   result JSON files. These are build checks; no board was flashed in this change.
