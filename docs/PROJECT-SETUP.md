@@ -24,15 +24,24 @@ specification.
 | `verification/` | Committed outcomes, including failed checks and hardware limits |
 | `build/`, `evidence/` | Ignored generated artifacts and full run logs |
 
-The application builds upstream `cannectivity/app` directly. The project does
-not fork Zephyr, CANnectivity or the NXP HAL. West fetches the seven pinned
-repositories. `scripts/fw.py prepare` verifies every revision and applies only
+The application builds upstream `cannectivity/app` directly. Its build manifest
+fetches upstream Zephyr, CANnectivity and NXP HAL, not the GitHub forks. West
+fetches the seven pinned repositories. `scripts/fw.py prepare` verifies every revision and applies only
 the reviewed CANnectivity compatibility patch; `check`, `app` and `bootloader`
 never fetch repositories. The bootloader and application share one partition
 overlay and signing key; changing either requires a paired image and recovery
 review. Python packages come from Zephyr's pinned build requirements and
 MCUboot's requirements after `west update`; the developer supplies the Arm GNU
 14.2.rel1 toolchain separately. See the README for exact commands.
+
+The user requires an upstream-compatible `gs_usb` implementation. The current
+patch changes USB descriptor ownership and class/interface setup for this
+legacy-stack composite DFU build; it does not change `gs_usb` control or frame
+formats. It is a temporary board bring-up exception, not a basis for custom
+`gs_usb` development or a public CANnectivity fork commit. Test CANnectivity's
+supported USB/DFU path from a clean checkout and remove the patch only after
+both channels, Windows enumeration/binding and app DFU pass on the board.
+
 The exact source commits and compiler version are pinned; upstream Python
 requirements specify minimum versions and are not yet hash-locked. Only the
 Windows build host has been checked with this portable workflow.

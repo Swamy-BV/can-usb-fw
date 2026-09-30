@@ -20,3 +20,12 @@ Keep MCX board and USB/DFU integration here; future MCU ports should use
 separate board configuration and preserve the gs_usb host contract. Record
 build and hardware outcomes separately, retain failed results, and commit
 verified changes. Do not push or publish unless asked.
+
+The user requires upstream CANnectivity `gs_usb`, without an ELROOT-specific
+replacement or private extension to its host protocol. Do not move the current
+board bring-up patch into the public CANnectivity fork or grow it into a custom
+`gs_usb` implementation. Treat that patch as a temporary compatibility exception:
+evaluate CANnectivity's supported USB/DFU configuration, then remove the patch
+only after a clean upstream checkout passes the existing enumeration, both CAN
+channels, Windows binding and DFU checks. Keep the last verified board image
+available until the replacement is physically checked.
