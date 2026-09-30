@@ -1,0 +1,10 @@
+zephyr_library()
+zephyr_library_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+if(CONFIG_BOOT_USB_DFU_GPIO)
+  zephyr_library_sources(boot_entry.c winusb.c)
+  zephyr_link_libraries(-Wl,--wrap=io_detect_pin -Wl,--wrap=usb_enable -Wl,--wrap=usb_set_config -Wl,--wrap=flash_img_init)
+elseif(CONFIG_BOOTLOADER_MCUBOOT)
+  zephyr_library_sources(control_request.c)
+  zephyr_link_libraries(-Wl,--wrap=usb_enable)
+endif()

@@ -25,7 +25,8 @@ def main():
     ap.add_argument('--serial', required=True)
     ap.add_argument('--evidence', type=Path, required=True)
     ap.add_argument('--negative-signature', action='store_true')
-    ap.add_argument('--dfu-mode', action='store_true', help='Resume in DFU in a fresh libusb process')
+    ap.add_argument('--dfu-mode', action='store_true', help='Continue in MCUboot in a fresh libusb process')
+    ap.add_argument('--transfer-mode', action='store_true', help='Transfer from DFU download mode in a fresh libusb process')
     args = ap.parse_args()
     args.evidence.mkdir(parents=True, exist_ok=False)
     payload, vid, pid, _ = parse(args.image.read_bytes())
@@ -51,7 +52,7 @@ def main():
               'statuses': [], 'bootloader_self_update': False}
     device = None
 
-    def discover(protocol, seconds=20):
+    def discover(interface_type, seconds=20):
         deadline = time.monotonic() + seconds
         while time.monotonic() < deadline:
             for candidate in usb.core.find(find_all=True, idVendor=vid, idProduct=pid, backend=backend):
@@ -67,7 +68,7 @@ def main():
                             raise ValueError('Malformed configuration descriptor')
                         desc = raw[offset:offset+size]
                         offset += size
-                        if size == 9 and desc[1] == 4 and tuple(desc[5:8]) == (0xfe, 1, protocol):
+                        if size == 9 and desc[1] == 4 and tuple(desc[5:8]) == interface_type:
                             if candidate.product != 'ELROOT CANFD (2 channel)':
                                 raise ValueError('Unexpected product')
                             # libusb may cache the former configuration while
@@ -77,14 +78,23 @@ def main():
                     pass
                 usb.util.dispose_resources(candidate)
             time.sleep(.2)
-        raise TimeoutError(f'DFU protocol {protocol} did not enumerate')
+        raise TimeoutError(f'USB interface {interface_type} did not enumerate')
 
     try:
-        if not args.dfu_mode:
-            device, intf = discover(1)
+        if not args.dfu_mode and not args.transfer_mode:
+            device, intf = discover((0xff, 0, 0))
             report['runtime_interface'] = intf.bInterfaceNumber
+            capability = bytes(device.ctrl_transfer(0xc0, 0x5a, 0, 0, 4, timeout=2000))
+            if capability != b'EL\x01\x01':
+                raise ValueError(f'Unexpected DFU entry capability: {capability.hex()}')
+            report['entry_capability'] = capability.hex()
             usb.util.claim_interface(device, intf.bInterfaceNumber)
-            device.ctrl_transfer(0x21, 0, 1000, intf.bInterfaceNumber, None, timeout=2000)
+            # gs_usb MODE_RESET on both channels. The target independently
+            # rejects DFU entry unless both controllers report STOPPED.
+            for channel in (0, 1):
+                device.ctrl_transfer(0x41, 2, channel, 0,
+                                     struct.pack('<2I', 0, 0), timeout=2000)
+            device.ctrl_transfer(0x40, 0x5b, 0xd0f1, 0, b'', timeout=2000)
             usb.util.dispose_resources(device)
             device = None
             intf = None
@@ -95,10 +105,37 @@ def main():
                 child_args.append('--negative-signature')
             subprocess.run(child_args, check=True)
             runtime_interface = report['runtime_interface']
+            entry_capability = report['entry_capability']
             report.update(json.loads((args.evidence/'transfer/result.json').read_text()))
             report['runtime_interface'] = runtime_interface
+            report['entry_capability'] = entry_capability
             return
-        device, intf = discover(2)
+        if args.dfu_mode:
+            # MCUboot starts with its standard runtime descriptor. A fresh
+            # process after DETACH avoids WinUSB/PyUSB's cached alt settings.
+            try:
+                device, intf = discover((0xfe, 1, 1), seconds=3)
+            except TimeoutError:
+                pass  # The board may already be in download mode.
+            else:
+                report['bootloader_runtime_interface'] = intf.bInterfaceNumber
+                usb.util.claim_interface(device, intf.bInterfaceNumber)
+                device.ctrl_transfer(0x21, 0, 1000, intf.bInterfaceNumber, None, timeout=2000)
+                usb.util.dispose_resources(device)
+                device = None
+                time.sleep(1)
+            child_args = [sys.executable, str(Path(__file__).resolve()), '--image', str(args.image),
+                          '--serial', args.serial, '--evidence', str(args.evidence/'transfer'),
+                          '--transfer-mode']
+            if args.negative_signature:
+                child_args.append('--negative-signature')
+            subprocess.run(child_args, check=True)
+            bootloader_runtime_interface = report.get('bootloader_runtime_interface')
+            report.update(json.loads((args.evidence/'transfer/result.json').read_text()))
+            if bootloader_runtime_interface is not None:
+                report['bootloader_runtime_interface'] = bootloader_runtime_interface
+            return
+        device, intf = discover((0xfe, 1, 2))
         interface = intf.bInterfaceNumber
         usb.util.claim_interface(device, interface)
         device.set_interface_altsetting(interface=interface, alternate_setting=1)
@@ -143,7 +180,7 @@ def main():
         # A manifestation state is only transfer evidence. Runtime return and
         # independent flash/UART checks establish activation or rejection.
         time.sleep(1)
-        device, intf = discover(1)
+        device, intf = discover((0xff, 0, 0))
         report.update(status='transfer-and-runtime-return-passed', bytes=len(payload),
                       blocks=final_block, seconds=time.monotonic()-started)
     except Exception as error:

@@ -1,0 +1,13 @@
+{
+  "check": "MCX-DFU-ENTRY-INTERLOCK",
+  "status": "passed",
+  "serial": "3A1F978456DF8D06D535A9A5BD62C632",
+  "script_sha256": "c5a6c728e5ea0072494f84b26910874dea2181087fb19f5e7a3b4e6b842c3171",
+  "capability": "454c0101",
+  "running_state": [
+    0,
+    0,
+    0
+  ],
+  "entry_rejection": "[Errno 32] Pipe error"
+}

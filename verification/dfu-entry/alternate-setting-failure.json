@@ -1,0 +1,12 @@
+{
+  "check": "MCX-DFU",
+  "status": "failed",
+  "serial": "3A1F978456DF8D06D535A9A5BD62C632",
+  "negative_signature": false,
+  "payload_sha256": "e995348c9750f072230d646680ea3b1020b52a82c0436ea3f008c76f4a4ed00e",
+  "script_sha256": "68aa03dc531e644d4e22a757fb98a4a2d77cee9c557dc902d4fe14d998036f5c",
+  "statuses": [],
+  "bootloader_self_update": false,
+  "bootloader_runtime_interface": 0,
+  "error": "No matching interface (0,1)"
+}

@@ -1,0 +1,45 @@
+{
+  "check": "MCX-EP0-DFU-ENTRY",
+  "date": "2026-09-30",
+  "status": "board-passed-with-open-recovery-gates",
+  "board": "FRDM-MCXN236",
+  "probe_uid": "GDZJO0MJCABTC",
+  "device_serial": "3A1F978456DF8D06D535A9A5BD62C632",
+  "lab_vid_pid": "1FC9:00A2",
+  "build_evidence": {
+    "app": "evidence/build-20260930T174558378527Z/result.json",
+    "bootloader": "evidence/bootloader-20260930T174631454055Z/result.json",
+    "app_signed_sha256": "bd0f69151e463ecd9d5cc5ebaa3241a8fd68b4bf958b80b61bcae48538391e1e",
+    "app_dfu_sha256": "2b3b586f7fd6e4171a1580f4e98e36022e6cf65482c8af2ab2b5f792098b8df8",
+    "bootloader_sha256": "c37bfdbcfd82142a9b7413833abbb4d2ef3db58745ae3830580e2af9cdff76e8",
+    "cannectivity_checkout_clean": true,
+    "mcuboot_checkout_clean": true
+  },
+  "board_evidence": {
+    "pre_flash_full_backup_sha256": "b479435386cc85df8e304977366ec6d6af786e9dc4ddd47687385c08ade2918e",
+    "pre_flash_full_backup_bytes": 1048576,
+    "bootloader_swd_verify": "evidence/dfu-entry-hardware-20260930/final-bootloader-verify.log",
+    "ep0_capability": "454c0101",
+    "busy_channel_rejection": "verification/dfu-entry/busy-rejection.json",
+    "signed_update": "verification/dfu-entry/signed-update.json",
+    "corrupted_transfer": "verification/dfu-entry/corrupted-transfer.json",
+    "corrupted_image_rejected_by_mcuboot_uart": "Image in the secondary slot is not valid!",
+    "post_negative_signed_update": "evidence/dfu-entry-hardware-20260930/post-negative-signed-update/result.json",
+    "two_channel_loopback": "verification/dfu-entry/two-channel-loopback.json",
+    "fd64_rx_frames_per_channel": 4096,
+    "fd64_tx_echoes_per_channel": 4096
+  },
+  "retained_failures": [
+    "verification/dfu-entry/initial-download-enumeration-failure.json",
+    "verification/dfu-entry/alternate-setting-failure.json",
+    "verification/dfu-entry/protected-slot-failure.json"
+  ],
+  "limitations": [
+    "No external CAN bus or second external transceiver qualification",
+    "No power-loss or interrupted-transfer recovery test",
+    "SW2 physical recovery and power-cycle stale-mailbox behavior remain untested for this revision",
+    "No authoritative pending-TX drain check before DFU entry",
+    "Lab VID/PID and development signing key are not production identity or trust policy",
+    "The EP0 command updates the application only; bootloader replacement used SWD"
+  ]
+}

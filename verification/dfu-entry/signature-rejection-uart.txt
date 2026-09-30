@@ -1,0 +1,5 @@
+I: Image index: 0, Swap type: test
+E: Image in the secondary slot is not valid!
+I: Image index: 0, Swap type: none
+I: Image version: v1.2.0
+I: Jumping to the first image slot

@@ -1,5 +1,15 @@
 # Verification record
 
+- The current clean-upstream app/MCUboot pair passed EP0 entry, MCUboot's
+  standard runtime DETACH and DFU slot-1 download, signed-image activation,
+  corrupted-image rejection, full-serial identity in both modes, and return
+  to both `gs_usb` channels. A running channel caused EP0 entry to stall. The
+  4,096 FD64-frame/channel internal-loopback probe reconciled RX and TX echo.
+  See `dfu-entry-hardware.json` and `../docs/DFU-ENTRY.md`. These checks do
+  not establish external-bus timing, power-loss recovery or SW2 recovery for
+  this revision. The prior bullets below describe the historical patched
+  runtime-DFU image and remain as retained evidence.
+
 - MCXN236-only timing pass: the connected board enumerated at USB high speed.
   At 1 Mbit/s nominal, its 50/48 MHz FlexCAN clocks accepted the data-phase
   settings in `mcu-timing-internal.json`; both channels simultaneously

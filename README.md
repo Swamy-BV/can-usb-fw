@@ -1,11 +1,14 @@
 # CAN USB firmware
 
 This is the fresh CANnectivity-based firmware project for the FRDM-MCXN236.
-It builds a Zephyr application with a `gs_usb` CAN/CAN FD interface and a
-standard USB DFU 1.1 runtime interface, plus a matching MCUboot recovery
-bootloader. The app source comes from pinned CANnectivity; the ELROOT-specific
-USB/DFU integration lives in `platform/usb_guard`, board settings in `board`,
-and the small upstream compatibility delta in `patches`.
+It builds a Zephyr application with an upstream `gs_usb` CAN/CAN FD interface
+and a matching MCUboot recovery bootloader. The app source comes from a clean,
+pinned CANnectivity checkout. Project-owned DFU entry control lives in
+`platform/mcxn236_control`; board settings live in `board`. The app exposes a
+device-level EP0 vendor command to reboot into MCUboot. A standard DFU DETACH
+then selects MCUboot's download mode for the signed application transfer. No
+CANnectivity or MCUboot source
+patch is required.
 
 See [project setup](docs/PROJECT-SETUP.md) for module ownership, the MCU port
 rule, and the next integration gates.
@@ -40,8 +43,8 @@ python scripts/fw.py app --toolchain /path/to/arm-gnu-toolchain --key /path/to/d
 
 The `west.yml` manifest pins seven source repositories to exact commits under
 ignored `.deps/`. `west update` is the sole repository download step. The
-portable `scripts/fw.py` builder checks revisions and the exact reviewable
-`patches/cannectivity-elroot-port.patch`; it does not download or install
+portable `scripts/fw.py` builder checks revisions and requires clean pinned
+dependency checkouts; it does not download or install
 dependencies. Run `python scripts/fw.py check` for a read-only check. If CMake
 or Ninja is installed but not on `PATH`, pass `--cmake` or `--ninja` with its
 executable path. Set `GNUARMEMB_TOOLCHAIN_PATH` instead of `--toolchain` if
@@ -78,10 +81,14 @@ running USB/UART probes. These packages are not needed to compile firmware.
 ```text
 python scripts/dfu-lab.py --image build/standalone/frdm_mcxn236/zephyr/can-usb.dfu --serial <authorized-board-serial> --evidence evidence/dfu-run
 python scripts/probe.py --serial <authorized-board-serial> --evidence evidence/usb-run --loopback --load-count 4096
+python scripts/probe-dfu-entry.py --serial <authorized-board-serial> --evidence evidence/dfu-entry-run
 ```
 
-The DFU checker validates the signed image and suffix, transfers over USB
-EP0, then waits for runtime enumeration. The probe checks both channels,
+The DFU checker stops both `gs_usb` channels, requests DFU entry through EP0,
+issues standard DFU DETACH in MCUboot, validates the signed image and suffix,
+transfers through MCUboot's standard USB DFU interface, then waits for `gs_usb`
+runtime enumeration. The entry probe checks rejection with a running channel.
+The CAN probe checks both channels,
 vendor interface, endpoints, capabilities, CAN FD internal loopback and
 channel isolation. Its load count applies to **each** channel and is
 host-paced, so it is **not** a physical bus throughput or latency measurement.
@@ -98,8 +105,7 @@ recognize this lab identity.
 
 CANnectivity is [Apache-2.0 licensed](https://github.com/CANnectivity/cannectivity)
 and its license is included in `LICENSE-CANNECTIVITY`. Preserve that license,
-upstream notices, and modification attribution with distributions. This
-project's patch remains separate from upstream source for review. The
+upstream notices, and modification attribution with distributions. The
 development key is for lab use only; production key custody, production USB
 identity, secure boot policy, bootloader self-update, power-loss recovery,
 second external CAN transceiver, hardware timestamps and external CAN bus

@@ -1,3 +1,0 @@
-name: elroot_usb_guard
-build:
-  cmake: .

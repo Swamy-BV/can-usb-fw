@@ -16,8 +16,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "west.yml"
-PATCH = ROOT / "patches/cannectivity-elroot-port.patch"
-PATCHED_FILES = ("app/src/usb.c", "subsys/usb/device/class/gs_usb.c")
 LAB_VID = 0x1FC9
 LAB_PID = 0x00A2
 
@@ -51,47 +49,14 @@ def check_revisions(entries):
         actual = run("git", "rev-parse", "HEAD", cwd=checkout, capture=True)
         if actual != entry["revision"]:
             raise RuntimeError(f"{name} is at {actual}; expected {entry['revision']}. Run 'west update'.")
-        if name != "cannectivity":
-            dirty = run("git", "status", "--porcelain", cwd=checkout, capture=True)
-            if dirty:
-                raise RuntimeError(f"Unexpected edits in pinned dependency {name}: {dirty}")
+        dirty = run("git", "status", "--porcelain", cwd=checkout, capture=True)
+        if dirty:
+            raise RuntimeError(f"Unexpected edits in pinned dependency {name}: {dirty}")
 
 
-def prepare_patch(checkout, apply):
-    expected = PATCH.read_bytes().replace(b"\r\n", b"\n")
-    actual = subprocess.run(
-        ["git", "diff", "--binary", "--", *PATCHED_FILES],
-        cwd=checkout,
-        capture_output=True,
-        check=True,
-    ).stdout.replace(b"\r\n", b"\n")
-    if not actual:
-        if not apply:
-            raise RuntimeError("CANnectivity patch is not applied; run 'python scripts/fw.py prepare'")
-        run("git", "apply", "--check", PATCH, cwd=checkout)
-        run("git", "apply", PATCH, cwd=checkout)
-        actual = subprocess.run(
-            ["git", "diff", "--binary", "--", *PATCHED_FILES],
-            cwd=checkout,
-            capture_output=True,
-            check=True,
-        ).stdout.replace(b"\r\n", b"\n")
-    if actual != expected:
-        raise RuntimeError("CANnectivity patch differs from the reviewed project patch")
-    paths = sorted(run("git", "diff", "--name-only", "HEAD", cwd=checkout, capture=True).splitlines())
-    untracked = run("git", "ls-files", "--others", "--exclude-standard", cwd=checkout, capture=True)
-    if untracked:
-        raise RuntimeError(f"Unexpected untracked files in CANnectivity: {untracked}")
-    if paths != sorted(PATCHED_FILES):
-        raise RuntimeError(f"Unexpected CANnectivity checkout edits: {paths}")
-    if "Apache License" not in (checkout / "LICENSE").read_text(encoding="utf-8"):
-        raise RuntimeError("CANnectivity Apache-2.0 license is missing")
-
-
-def prepare(apply=True):
+def prepare():
     entries = projects()
     check_revisions(entries)
-    prepare_patch(ROOT / entries["cannectivity"]["path"], apply)
     return entries
 
 
@@ -122,7 +87,7 @@ def compiler_root(value):
 
 def modules(entries):
     names = ("cmsis", "cmsis_6", "hal_nxp", "mcuboot", "mbedtls", "cannectivity")
-    return [ROOT / entries[name]["path"] for name in names] + [ROOT / "platform/usb_guard"]
+    return [ROOT / entries[name]["path"] for name in names] + [ROOT / "platform/mcxn236_control"]
 
 
 def identity_file(path, key, version, bootloader):
@@ -154,7 +119,7 @@ def sha256(path):
 
 def project_source_hashes():
     files = [ROOT / "west.yml"]
-    for directory in ("board", "patches", "platform", "scripts"):
+    for directory in ("board", "platform", "scripts"):
         files.extend(path for path in (ROOT / directory).rglob("*") if path.is_file())
     return {
         path.relative_to(ROOT).as_posix(): sha256(path)
@@ -277,8 +242,8 @@ def build(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     subcommands = parser.add_subparsers(dest="command", required=True)
-    subcommands.add_parser("check", help="verify pinned checkouts and applied patch")
-    subcommands.add_parser("prepare", help="verify checkouts and apply the local patch")
+    subcommands.add_parser("check", help="verify pinned clean dependency checkouts")
+    subcommands.add_parser("prepare", help="verify pinned clean dependency checkouts")
     for name in ("app", "bootloader"):
         command = subcommands.add_parser(name, help=f"build {name} without downloading dependencies")
         command.add_argument("--toolchain", help="Arm GNU toolchain root")
@@ -289,8 +254,8 @@ def main():
     args = parser.parse_args()
     try:
         if args.command in ("check", "prepare"):
-            prepare(apply=args.command == "prepare")
-            print("Pinned dependency revisions and CANnectivity patch verified")
+            prepare()
+            print("Pinned clean dependency revisions verified")
         else:
             build(args)
     except Exception as error:

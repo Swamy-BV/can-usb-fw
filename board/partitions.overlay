@@ -3,3 +3,7 @@
  * Application and bootloader must use the same project overlay. */
 &slot0_partition { reg = <0x00014000 0x0006c000>; };
 &slot1_partition { reg = <0x00084000 0x0006c000>; };
+
+/* Reserve 16 bytes across app and MCUboot for a one-shot DFU reboot request.
+ * The translated CPU SRAM alias ends at 0x30030000; mailbox at 0x3002fff0. */
+&sram0 { reg = <0x20000000 0x0002fff0>; };

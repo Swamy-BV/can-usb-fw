@@ -1,11 +1,10 @@
-/* Project-owned Windows binding for runtime composite and recovery DFU. */
+/* Project-owned WinUSB binding for MCUboot recovery DFU. */
 #include <zephyr/usb/usb_device.h>
 #include <zephyr/usb/bos.h>
 #include <zephyr/usb/msos_desc.h>
 #include <zephyr/sys/byteorder.h>
 #include <string.h>
 static uint8_t set[768];
-static bool dfu_mode;
 static bool registered;
 static usb_request_handler original_vendor[4];
 static uint8_t original_interface[4];
@@ -29,7 +28,10 @@ static size_t descriptors(void)
             if (count<4) { interfaces[count++]=d->bInterfaceNumber; }
         }
     }
-    if (dfu_mode) { count=1; interfaces[0]=0; }
+#if defined(CONFIG_BOOT_USB_DFU_GPIO)
+    /* MCUboot uses its alternate DFU-mode descriptor, not the runtime one. */
+    count=1; interfaces[0]=0;
+#endif
     size_t offset=sizeof(struct msosv2_descriptor_set_header);
     for (unsigned i=0;i<count;++i) {
         struct msosv2_compatible_id compatible={sizeof(compatible),MS_OS_20_FEATURE_COMPATIBLE_ID,"WINUSB",{0}};
@@ -62,9 +64,8 @@ static int vendor(struct usb_setup_packet *setup,int32_t *length,uint8_t **data)
     }
     return -ENOTSUP;
 }
-void fw_dfu_windows_init(void)
+static void windows_init(void)
 {
-    dfu_mode=false;
     descriptors();
     original_count=0;
     STRUCT_SECTION_FOREACH(usb_cfg_data,cfg) {
@@ -78,7 +79,12 @@ void fw_dfu_windows_init(void)
     }
     if (!registered) { usb_bos_register_cap(&dfu_bos); registered=true; }
 }
-void fw_dfu_windows_mode(void) { dfu_mode=true; descriptors(); }
+int __real_usb_enable(usb_dc_status_callback status_cb);
+int __wrap_usb_enable(usb_dc_status_callback status_cb)
+{
+    windows_init();
+    return __real_usb_enable(status_cb);
+}
 int __real_usb_set_config(const uint8_t *description);
 int __wrap_usb_set_config(const uint8_t *description)
 {
