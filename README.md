@@ -7,6 +7,9 @@ bootloader. The app source comes from pinned CANnectivity; the ELROOT-specific
 USB/DFU integration lives in `platform/usb_guard`, board settings in `board`,
 and the small upstream compatibility delta in `patches`.
 
+See [project setup](docs/PROJECT-SETUP.md) for module ownership, the MCU port
+rule, and the next integration gates.
+
 The intended product is **ELROOT CANFD (2 channel)**. MCXN236 has two FlexCAN
 controllers. This build maps USB channel 0 to FlexCAN1 and channel 1 to
 FlexCAN0. Both can be operated in internal loopback. The FRDM board has one
