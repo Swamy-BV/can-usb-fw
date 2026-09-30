@@ -1,0 +1,66 @@
+diff --git a/app/src/usb.c b/app/src/usb.c
+index 013317b..d2ef26b 100644
+--- a/app/src/usb.c
++++ b/app/src/usb.c
+@@ -39,7 +39,8 @@ LOG_MODULE_REGISTER(usb, CONFIG_CANNECTIVITY_LOG_LEVEL);
+ #ifdef CONFIG_USB_DEVICE_STACK_NEXT
+ #define CANNECTIVITY_BOS_DESC_DEFINE_CAP static
+ #else /* CONFIG_USB_DEVICE_STACK_NEXT */
+-#define CANNECTIVITY_BOS_DESC_DEFINE_CAP USB_DEVICE_BOS_DESC_DEFINE_CAP
++/* The ELROOT legacy-stack port provides the sole BOS capability in dfu_guard. */
++#define CANNECTIVITY_BOS_DESC_DEFINE_CAP static
+ #endif /* !CONFIG_USB_DEVICE_STACK_NEXT */
+ 
+ CANNECTIVITY_BOS_DESC_DEFINE_CAP const struct usb_bos_capability_lpm bos_cap_lpm = {
+@@ -633,10 +634,9 @@ int cannectivity_usb_init(void)
+ 
+ 	desc->bcdDevice = sys_cpu_to_le16(CANNECTIVITY_USB_BCD_DRN);
+ 
+-	usb_bos_register_cap((void *)&bos_cap_lpm);
+-	usb_bos_register_cap((void *)&bos_cap_msosv2);
+-
+-	gs_usb_register_vendorcode_callback(cannectivity_usb_vendorcode_handler);
++	/* ELROOT's DFU guard owns the WinUSB/MS OS descriptor and vendor code.
++	 * Keep a single registration point for the composite USB device.
++	 */
+ 
+ 	return usb_enable(NULL);
+ #endif /* !CONFIG_USB_DEVICE_STACK_NEXT */
+diff --git a/subsys/usb/device/class/gs_usb.c b/subsys/usb/device/class/gs_usb.c
+index 41e4511..f350d9b 100644
+--- a/subsys/usb/device/class/gs_usb.c
++++ b/subsys/usb/device/class/gs_usb.c
+@@ -1462,12 +1462,23 @@ static void gs_usb_interface_config(struct usb_desc_header *head, uint8_t bInter
+ 	struct usb_if_descriptor *if_desc = (struct usb_if_descriptor *)head;
+ 	struct gs_usb_config *desc = CONTAINER_OF(if_desc, struct gs_usb_config, if0);
+ 	struct usb_dev_data *common;
++	struct usb_dev_data *candidate;
+ 	struct gs_usb_data *data;
+ 	int idx;
+ 
+ 	LOG_DBG("bInterfaceNumber = %u", bInterfaceNumber);
+ 
+-	common = usb_get_dev_data_by_iface(&gs_usb_data_devlist, bInterfaceNumber);
++	/* The legacy stack calls this before writing the assigned interface number.
++	 * Match the descriptor being configured instead of its old number.
++	 */
++	common = NULL;
++	SYS_SLIST_FOR_EACH_CONTAINER(&gs_usb_data_devlist, candidate, node) {
++		if (((const struct usb_cfg_data *)candidate->dev->config)->interface_descriptor ==
++		    head) {
++			common = candidate;
++			break;
++		}
++	}
+ 	if (common == NULL) {
+ 		LOG_ERR("device data not found for interface %u", bInterfaceNumber);
+ 		return;
+@@ -1547,7 +1558,7 @@ static int gs_usb_init(const struct device *dev)
+ 			.bString = DT_INST_PROP(inst, label),                                      \
+ 		};))                                                                               \
+                                                                                                    \
+-	USBD_CLASS_DESCR_DEFINE(primary, 0)                                                        \
++	USBD_CLASS_DESCR_DEFINE(primary, -1)                                                       \
+ 	struct gs_usb_config gs_usb_config_##inst = {                                              \
+ 		.if0 = INITIALIZER_IF,                                                             \
+ 		.if0_in_ep = INITIALIZER_IF_EP(GS_USB_IN_EP_ADDR),                                 \

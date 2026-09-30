@@ -1,0 +1,18 @@
+*** Booting MCUboot ee39e2d694bd ***
+*** Using Zephyr OS build v4.4.0 ***
+I: Starting bootloader
+I: Image index: 0, Swap type: none
+I: Bootloader chainload address offset: 0x14000
+I: Image version: v1.1.9
+I: Jumping to the first image slot
+*** Booting Zephyr OS build v4.4.0 ***
+*** CANnectivity firmware v1.3.0 ***
+[00:00:00.000,000] [0m<dbg> gs_usb: gs_usb_register_channel: channel 0 features = 0x00002507[0m
+[00:00:00.000,000] [0m<dbg> gs_usb: gs_usb_interface_config: bInterfaceNumber = 0[0m
+[00:00:00.000,000] [0m<inf> main: CANnectivity firmware initialized with 1 channel[0m
+[00:00:00.003,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device suspend[0m
+[00:00:00.205,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device reset[0m
+[00:00:00.319,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device suspend[0m
+[00:00:01.900,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device reset[0m
+[00:00:01.962,000] [0m<dbg> gs_usb: gs_usb_status_callback: USB device configured[0m
+[00:00:01.962,000] [0m<db

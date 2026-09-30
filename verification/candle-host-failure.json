@@ -1,0 +1,19 @@
+{
+  "requirement": "FW-019",
+  "status": "failed",
+  "tool": "python-can-candle",
+  "candle_version": "1.2.4",
+  "python_can_version": "4.6.1",
+  "serial": "3A1F978456DF8D06D535A9A5BD62C632",
+  "vid": 8137,
+  "pid": 162,
+  "requested_frames": 256,
+  "window": 8,
+  "script_sha256": "12521c1e5e8237e829858bc334918445381e6bf0fdcc66824b66d8e6ca506f9b",
+  "image_sha256": "ae5f79770357a6e571b7800874888c092909e47ad1e6673605873423dba743ef",
+  "candle_extension_sha256": "56796a50033dad802db781967fe053bea5e8e0cec8d723b59918493df3603c21",
+  "physical_bus_qualified": false,
+  "hardware_timestamps_qualified": false,
+  "actual_channels": 1,
+  "error": "AssertionError('Frame mismatch: can.Message(timestamp=31.176373, arbitration_id=0x0, is_extended_id=False, is_rx=False, channel=0, dlc=0, data=[])')"
+}

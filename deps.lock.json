@@ -1,0 +1,11 @@
+{
+  "zephyr_version": "4.4.0",
+  "zephyr_commit": "684c9e8f32e4373a21098559f748f06915f950c9",
+  "cmsis_commit": "512cc7e895e8491696b61f7ba8066b4a182569b8",
+  "cmsis_6_commit": "30a859f44ef8ab4dc8f84b03ed586fd16ccf9d74",
+  "hal_nxp_commit": "2c2f28ac333e995d7279777409817c4b4f92c1ec",
+  "mcuboot_commit": "ee39e2d694bd827ffd1bebbce2f571a9154e6ec2",
+  "mbedtls_commit": "a3e190fe44c78d1ba67f55979e1257328cc7d0d8",
+  "cannectivity_commit": "61be4896de6cf96daed5dd3dd8a46de53ef43641",
+  "compiler": "Arm GNU 14.2.rel1"
+}

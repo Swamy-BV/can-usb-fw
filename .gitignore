@@ -1,0 +1,5 @@
+/.deps/
+/build/
+/evidence/
+*.pyc
+__pycache__/

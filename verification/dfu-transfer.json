@@ -1,0 +1,522 @@
+{
+  "check": "MCX-DFU",
+  "status": "transfer-and-runtime-return-passed",
+  "serial": "3A1F978456DF8D06D535A9A5BD62C632",
+  "negative_signature": false,
+  "payload_sha256": "63e95ac3c9a1b98e5f1b7b0aa84cc393d1afdc500613555471d61a6075e6c15e",
+  "script_sha256": "cb48e1f8a2102e3d02ca973f369981776425b3302cc22b15932311b7f38086f6",
+  "statuses": [
+    {
+      "block": 0,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 1,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 2,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 3,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 4,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 5,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 6,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 7,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 8,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 9,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 10,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 11,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 12,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 13,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 14,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 15,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 16,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 17,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 18,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 19,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 20,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 21,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 22,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 23,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 24,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 25,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 26,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 27,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 28,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 29,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 30,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 31,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 32,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 33,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 34,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 35,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 36,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 37,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 38,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 39,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 40,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 41,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 42,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 43,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 44,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 45,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 46,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 47,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 48,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 49,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 50,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 51,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 52,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 53,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 54,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 55,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 56,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 57,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 58,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 59,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 60,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 61,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 62,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 63,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 64,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 65,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 66,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 67,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 68,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 69,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 70,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 71,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 72,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 73,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 74,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 75,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 76,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 77,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 78,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 79,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 80,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 81,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 82,
+      "status": 0,
+      "state": 5,
+      "poll_ms": 8
+    },
+    {
+      "block": 83,
+      "status": 0,
+      "state": 8,
+      "poll_ms": 8
+    }
+  ],
+  "bootloader_self_update": false,
+  "runtime_interface": 1,
+  "dfu_interface": 0,
+  "target_alternate": 1,
+  "transfer_size": 1024,
+  "bytes": 84443,
+  "blocks": 83,
+  "seconds": 3.25
+}

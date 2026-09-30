@@ -1,0 +1,5 @@
+/* Pinned upstream's 440 KiB secondary slot overlaps storage by 8 KiB.
+ * Equal 432 KiB slots preserve 8 KiB erase alignment and avoid that overlap.
+ * Application and bootloader must use the same project overlay. */
+&slot0_partition { reg = <0x00014000 0x0006c000>; };
+&slot1_partition { reg = <0x00084000 0x0006c000>; };

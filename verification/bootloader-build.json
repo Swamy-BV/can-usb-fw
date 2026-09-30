@@ -1,0 +1,10 @@
+{
+  "bootloader_sha256": "d76af6e4c211151eb8b107a29e8f51c08e7b71747c66b1c2d24028e1bb6d8e1d",
+  "status": "build-passed",
+  "bootloader_self_update_tested": false,
+  "pid": "00A2",
+  "flashed_to_board": false,
+  "bootloader_commit": "ee39e2d694bd827ffd1bebbce2f571a9154e6ec2",
+  "vid": "1FC9",
+  "board": "frdm_mcxn236"
+}
